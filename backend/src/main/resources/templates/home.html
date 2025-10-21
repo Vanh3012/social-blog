@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ - Social Blog</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Chào mừng đến với Social Blog</h1>
+            <div class="user-info">
+                <p>Xin chào, <span sec:authentication="name">User</span>!</p>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn-logout">Đăng xuất</button>
+                </form>
+            </div>
+        </header>
+
+        <main>
+            <h2>Trang chủ</h2>
+            <p>Bạn đã đăng nhập thành công vào hệ thống!</p>
+
+            <div class="features">
+                <h3>Các tính năng:</h3>
+                <ul>
+                    <li>Đăng bài viết</li>
+                    <li>Bình luận</li>
+                    <li>Kết bạn</li>
+                    <li>Nhắn tin</li>
+                    <li>Thông báo</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

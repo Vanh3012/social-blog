@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký tài khoản</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Đăng ký tài khoản</h2>
+
+        <form th:action="@{/register}" th:object="${user}" method="post">
+
+            <!-- Thông tin đăng nhập -->
+            <div class="form-section">
+                <h3>Thông tin đăng nhập</h3>
+
+                <div class="form-group full-width">
+                    <label for="username">Tên đăng nhập *</label>
+                    <input type="text" id="username" th:field="*{username}" required placeholder="Nhập tên đăng nhập">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Mật khẩu *</label>
+                        <input type="password" id="password" th:field="*{password}" required minlength="6"
+                            placeholder="Ít nhất 6 ký tự">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Xác nhận mật khẩu *</label>
+                        <input type="password" id="confirmPassword" th:field="*{confirmPassword}" required minlength="6"
+                            placeholder="Nhập lại mật khẩu">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông tin cá nhân -->
+            <div class="form-section">
+                <h3>Thông tin cá nhân</h3>
+
+                <div class="form-group full-width">
+                    <label for="fullName">Họ và tên *</label>
+                    <input type="text" id="fullName" th:field="*{fullName}" required
+                        placeholder="Nhập họ và tên đầy đủ">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" th:field="*{email}" required placeholder="example@email.com">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phoneNumber">Số điện thoại *</label>
+                        <input type="text" id="phoneNumber" th:field="*{phoneNumber}" required pattern="[0-9]{10,11}"
+                            placeholder="0xxxxxxxxx">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="citizenId">Số CCCD *</label>
+                        <input type="text" id="citizenId" th:field="*{citizenId}" required pattern="[0-9]{12}"
+                            placeholder="12 số" maxlength="12">
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="address">Địa chỉ *</label>
+                    <input type="text" id="address" th:field="*{address}" required
+                        placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dateOfBirth">Ngày sinh</label>
+                        <input type="date" id="dateOfBirth" th:field="*{dateOfBirth}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender">Giới tính</label>
+                        <select id="gender" th:field="*{gender}">
+                            <option value="">-- Chọn giới tính --</option>
+                            <option value="MALE">Nam</option>
+                            <option value="FEMALE">Nữ</option>
+                            <option value="OTHER">Khác</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${errorMessage}" class="error" th:text="${errorMessage}"></div>
+
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit">Đăng ký</button>
+        </form>
+
+        <p>Đã có tài khoản? <a th:href="@{/login}">Đăng nhập</a></p>
+    </div>
+
+    <script>
+        // Kiểm tra mật khẩu khớp nhau khi submit
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Mật khẩu xác nhận không khớp!');
+                return false;
+            }
+        });
+
+        // Kiểm tra CCCD chỉ nhập số
+        document.getElementById('citizenId').addEventListener('input', function (e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Kiểm tra số điện thoại chỉ nhập số
+        document.getElementById('phoneNumber').addEventListener('input', function (e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    </script>
+</body>
+
+</html>
