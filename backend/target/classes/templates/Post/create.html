@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+    th:with="pageTitle='Tạo bài viết', content='this :: content'" 
+    th:replace="~{layout/base :: layout(~{::content})}">
+
+<body>
+    <section th:fragment="content">
+        <div class="max-w-2xl mx-auto">
+            <div class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+                <h1 class="text-xl font-semibold mb-6">✏️ Tạo bài viết mới</h1>
+
+                <form th:action="@{/post/create}" th:object="${post}" method="post" x-data="{loading:false}"
+                    @submit="loading=true">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <div class="space-y-4">
+                        <div>
+                            <label for="content" class="block text-sm font-medium mb-2">Nội dung bài viết *</label>
+                            <textarea id="content" th:field="*{content}" rows="6" required
+                                placeholder="Bạn đang nghĩ gì?"
+                                class="w-full rounded-xl border border-neutral-300 px-3 py-2 focus:ring-2 focus:ring-neutral-900 resize-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label for="imageUrl" class="block text-sm font-medium mb-2">URL hình ảnh (tùy chọn)</label>
+                            <input type="text" id="imageUrl" th:field="*{imageUrl}"
+                                placeholder="https://example.com/image.jpg"
+                                class="w-full rounded-xl border border-neutral-300 px-3 py-2 focus:ring-2 focus:ring-neutral-900">
+                        </div>
+
+                        <div>
+                            <label for="visibility" class="block text-sm font-medium mb-2">Chế độ hiển thị *</label>
+                            <select id="visibility" th:field="*{visibility}" required
+                                class="w-full rounded-xl border border-neutral-300 px-3 py-2 focus:ring-2 focus:ring-neutral-900">
+                                <option th:each="v : ${visibilities}" th:value="${v}" th:text="${v.toString() == 'PUBLIC' ? '🌍 Công khai' : 
+                                             (v.toString() == 'FRIENDS' ? '👥 Bạn bè' : '🔒 Riêng tư')}">
+                                </option>
+                            </select>
+                            <div class="mt-2 text-xs text-neutral-500 space-y-1">
+                                <div>🌍 Công khai: Mọi người đều xem được</div>
+                                <div>👥 Bạn bè: Chỉ bạn bè mới xem được</div>
+                                <div>🔒 Riêng tư: Chỉ mình bạn xem được</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex items-center gap-3">
+                        <a th:href="@{/}"
+                            class="flex-1 text-center rounded-lg border border-neutral-300 px-4 py-2.5 text-sm hover:bg-neutral-100 transition">
+                            Hủy
+                        </a>
+                        <button type="submit"
+                            class="flex-1 rounded-lg bg-neutral-900 text-white px-4 py-2.5 hover:bg-black disabled:opacity-50 transition"
+                            :disabled="loading" x-text="loading?'Đang đăng...':'Đăng bài'">
+                            Đăng bài
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>

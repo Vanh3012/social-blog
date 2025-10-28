@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" 
+    th:with="pageTitle='Bài viết của tôi', content='this :: content'"
+    th:replace="~{layout/base :: layout(~{::content})}">
+
+<body>
+    <section th:fragment="content">
+        <div class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+            <h1 class="text-lg font-semibold mb-4">Bài viết</h1>
+            <div class="divide-y divide-neutral-200" th:if="${posts}">
+                <div th:each="p : ${posts}" class="py-4 flex items-center justify-between">
+                    <a th:href="@{|/post/${p.id}|}" class="font-medium hover:underline"
+                        th:text="${#strings.abbreviate(p.content,80)}">Nội dung...</a>
+                    <div class="text-sm text-neutral-500"
+                        th:text="${#temporals.format(p.createdAt,'dd/MM/yyyy HH:mm')}">time</div>
+                </div>
+            </div>
+            <div th:if="${posts == null or #lists.isEmpty(posts)}" class="text-neutral-500">Chưa có bài viết.</div>
+        </div>
+    </section>
+</body>
+
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<body>
+    <nav th:fragment="navbar" class="border-b border-neutral-200 bg-white sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="/" class="text-xl font-semibold text-neutral-900">SocialBlog</a>
+
+            <!-- Menu -->
+            <div class="flex items-center gap-4">
+                <!-- Khi đã đăng nhập -->
+                <div sec:authorize="isAuthenticated()" class="flex items-center gap-3">
+                    <a href="/" class="text-sm hover:text-neutral-600">Trang chủ</a>
+                    <a href="/posts/create" class="text-sm hover:text-neutral-600">Tạo bài</a>
+                    <a href="/profile" class="text-sm hover:text-neutral-600">
+                        <span sec:authentication="name">Username</span>
+                    </a>
+                    <form th:action="@{/logout}" method="post" class="inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button type="submit" class="text-sm text-red-600 hover:text-red-700">Đăng xuất</button>
+                    </form>
+                </div>
+
+                <!-- Khi chưa đăng nhập -->
+                <div sec:authorize="!isAuthenticated()" class="flex items-center gap-3">
+                    <a href="/login" class="text-sm hover:text-neutral-600">Đăng nhập</a>
+                    <a href="/register" class="text-sm bg-neutral-900 text-white px-4 py-2 rounded-lg hover:bg-black">
+                        Đăng ký
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+</body>
+
+</html>

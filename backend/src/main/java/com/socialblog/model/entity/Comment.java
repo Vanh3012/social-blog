@@ -16,25 +16,28 @@ import java.util.List;
 @Table(name = "comments")
 public class Comment extends BaseEntity {
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    // ===== Người viết bình luận =====
+    @Column(name = "is_edited")
+    private boolean edited = false;
+
+    // ===== Quan hệ với tác giả =====
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-    // ===== Bài viết mà bình luận thuộc về =====
+    // ===== Quan hệ với bài viết =====
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    // ===== Bình luận cha (nếu là trả lời) =====
+    // ===== Comment cha (để reply) =====
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
     private Comment parentComment;
 
-    // ===== Danh sách các phản hồi (bình luận con) =====
+    // ===== Các comment con (replies) =====
     @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> replies = new ArrayList<>();
 }

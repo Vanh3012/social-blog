@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" 
+    th:with="pageTitle='Đăng nhập', content='this :: content' "
+    th:replace="~{layout/base :: layout(~{::content})}">
+
+<body>
+    <section th:fragment="content">
+        <div class="min-h-[70vh] grid place-items-center">
+            <div class="w-full max-w-md bg-white border border-neutral-200 rounded-2xl shadow-sm p-6">
+                <h1 class="text-xl font-semibold mb-1 text-neutral-900">Facebook</h1>
+                <p class="text-sm text-neutral-500 mb-6">Đăng nhập để tiếp tục</p>
+
+                <div th:if="${errorMessage}"
+                    class="mb-4 rounded-lg border border-red-200 bg-red-50 text-red-900 px-4 py-3" data-auto-hide>
+                    <div th:text="${errorMessage}">Sai thông tin đăng nhập</div>
+                </div>
+                <div th:if="${logoutMessage}"
+                    class="mb-4 rounded-lg border border-green-200 bg-green-50 text-green-900 px-4 py-3" data-auto-hide>
+                    <div th:text="${logoutMessage}">Đăng xuất thành công</div>
+                </div>
+
+                <form th:action="@{/login}" method="post" x-data="{show:false,loading:false}" @submit="loading=true">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm mb-1">Tên đăng nhập</label>
+                            <input name="username" required
+                                class="w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none focus:ring-2 focus:ring-neutral-900"
+                                placeholder="username" />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">Mật khẩu</label>
+                            <div class="relative">
+                                <input :type="show?'text':'password'" name="password" required
+                                    class="w-full rounded-lg border border-neutral-300 px-3 py-2 pr-10 outline-none focus:ring-2 focus:ring-neutral-900"
+                                    placeholder="••••••••" />
+                                <button class="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-neutral-500"
+                                    type="button" @click="show=!show" x-text="show?'Ẩn':'Hiện'"></button>
+                            </div>
+                        </div>
+                        <button type="submit"
+                            class="w-full rounded-lg bg-neutral-900 text-white py-2.5 hover:bg-black disabled:opacity-50"
+                            :disabled="loading" x-text="loading?'Đang đăng nhập...':'Đăng nhập'">Đăng nhập</button>
+                    </div>
+                </form>
+
+                <p class="text-sm text-neutral-600 mt-6">
+                    Chưa có tài khoản?
+                    <a href="/register" class="text-neutral-900 underline underline-offset-4">Đăng ký</a>
+                </p>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>

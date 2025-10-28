@@ -34,13 +34,13 @@ public class AuthController {
             model.addAttribute("logoutMessage", "Đăng xuất thành công!");
         }
 
-        return "login";
+        return "Auth/login";
     }
 
     @GetMapping("/register")
     public String registerPage(Model model) {
         model.addAttribute("user", new RegisterRequest());
-        return "register";
+        return "Auth/register";
     }
 
     @PostMapping("/register")
@@ -54,47 +54,47 @@ public class AuthController {
             // Validate dữ liệu đầu vào
             if (form.getUsername() == null || form.getUsername().trim().isEmpty()) {
                 model.addAttribute("errorMessage", "Tên đăng nhập không được để trống!");
-                return "register";
+                return "Auth/register";
             }
 
             if (form.getPassword() == null || form.getPassword().length() < 6) {
                 model.addAttribute("errorMessage", "Mật khẩu phải có ít nhất 6 ký tự!");
-                return "register";
+                return "Auth/register";
             }
 
             // Kiểm tra xác nhận mật khẩu
             if (form.getConfirmPassword() == null || !form.getPassword().equals(form.getConfirmPassword())) {
                 model.addAttribute("errorMessage", "Mật khẩu xác nhận không khớp!");
-                return "register";
+                return "Auth/register";
             }
 
             if (form.getEmail() == null || !form.getEmail().contains("@")) {
                 model.addAttribute("errorMessage", "Email không hợp lệ!");
-                return "register";
+                return "Auth/register";
             }
 
             // Validate địa chỉ
             if (form.getAddress() == null || form.getAddress().trim().isEmpty()) {
                 model.addAttribute("errorMessage", "Địa chỉ không được để trống!");
-                return "register";
+                return "Auth/register";
             }
 
             // Validate CCCD (12 số)
             if (form.getCitizenId() == null || !form.getCitizenId().matches("\\d{12}")) {
                 model.addAttribute("errorMessage", "CCCD phải có đúng 12 số!");
-                return "register";
+                return "Auth/register";
             }
 
             // Kiểm tra username đã tồn tại
             if (userRepository.existsByUsername(form.getUsername())) {
                 model.addAttribute("errorMessage", "Username đã tồn tại!");
-                return "register";
+                return "Auth/register";
             }
 
             // Kiểm tra email đã tồn tại
             if (userRepository.existsByEmail(form.getEmail())) {
                 model.addAttribute("errorMessage", "Email đã tồn tại!");
-                return "register";
+                return "Auth/register";
             }
 
             // Tạo user mới
@@ -123,17 +123,13 @@ public class AuthController {
         } catch (Exception e) {
             log.error("Lỗi khi đăng ký: ", e);
             model.addAttribute("errorMessage", "Có lỗi xảy ra, vui lòng thử lại!");
-            return "register";
+            return "Auth/register";
         }
     }
 
     @GetMapping("/home")
     public String home() {
-        return "home";
+        return "Post/home";
     }
 
-    @GetMapping("/")
-    public String index() {
-        return "redirect:/home";
-    }
 }

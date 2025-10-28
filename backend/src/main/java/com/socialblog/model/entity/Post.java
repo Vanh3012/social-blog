@@ -25,6 +25,13 @@ public class Post extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Visibility visibility = Visibility.PUBLIC;
 
+    // Thêm các trường đếm
+    @Column(name = "like_count")
+    private int likeCount = 0;
+
+    @Column(name = "comment_count")
+    private int commentCount = 0;
+
     // ===== Quan hệ với tác giả (User) =====
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
@@ -42,4 +49,29 @@ public class Post extends BaseEntity {
     // ===== Quan hệ với Comment =====
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+
+    // ===== Helper methods để tính toán count =====
+    public int getLikeCount() {
+        if (reactions != null) {
+            return (int) reactions.stream()
+                    .filter(r -> r.getType() != null)
+                    .count();
+        }
+        return this.likeCount;
+    }
+
+    public int getCommentCount() {
+        if (comments != null) {
+            return comments.size();
+        }
+        return this.commentCount;
+    }
+
+    public void updateLikeCount() {
+        this.likeCount = getLikeCount();
+    }
+
+    public void updateCommentCount() {
+        this.commentCount = getCommentCount();
+    }
 }

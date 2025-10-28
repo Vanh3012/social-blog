@@ -5,8 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,20 +23,29 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 http
+                                .csrf(csrf -> csrf
+                                                .ignoringRequestMatchers("/register", "/api/**"))
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers(
-                                                                "/", "/home",
-                                                                "/login", "/register",
-                                                                "/css/**", "/js/**", "/images/**")
+                                                // Cho phép truy cập công khai
+                                                .requestMatchers("/", "/login", "/register",
+                                                                "/css/**", "/js/**", "/images/**",
+                                                                "/about", "/contact")
                                                 .permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
-                                                .anyRequest().authenticated())
+
+                                                // Bắt đăng nhập
+                                                .requestMatchers("/Post/**", "/User/**", "/Message/**",
+                                                                "/Notification/**")
+                                                .authenticated()
+
+                                                // Các route khác mặc định cho phép (để tránh vòng lặp)
+                                                .anyRequest().permitAll())
                                 .formLogin(form -> form
                                                 .loginPage("/login")
                                                 .loginProcessingUrl("/login")
                                                 .usernameParameter("username")
                                                 .passwordParameter("password")
-                                                .defaultSuccessUrl("/home", true)
+                                                .defaultSuccessUrl("/", false) // ❗ không ép luôn true để tránh vòng lặp
                                                 .failureUrl("/login?error=true")
                                                 .permitAll())
                                 .logout(logout -> logout
@@ -42,14 +53,18 @@ public class SecurityConfig {
                                                 .logoutSuccessUrl("/login?logout=true")
                                                 .invalidateHttpSession(true)
                                                 .deleteCookies("JSESSIONID")
-                                                .permitAll())
-                                .userDetailsService(userDetailsService)
-                                .csrf(csrf -> csrf
-                                                .ignoringRequestMatchers("/register") // Tạm thời disable CSRF cho
-                                                                                      // register nếu cần
-                                );
+                                                .permitAll());
 
                 return http.build();
+        }
+
+        // cấu hình xác thực
+        @Bean
+        public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+                AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+                builder.userDetailsService(userDetailsService)
+                                .passwordEncoder(passwordEncoder());
+                return builder.build();
         }
 
         @Bean

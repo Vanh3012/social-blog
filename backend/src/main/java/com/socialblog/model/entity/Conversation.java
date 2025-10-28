@@ -17,6 +17,9 @@ public class Conversation extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(name = "is_group")
+    private boolean group = false; // false = private chat, true = group chat
+
     // Quan hệ 1-n với Message
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> messages = new ArrayList<>();

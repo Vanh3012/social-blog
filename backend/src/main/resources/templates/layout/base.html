@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+    <html lang="vi" xmlns:th="http://www.thymeleaf.org" 
+        th:fragment="layout(content)">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${pageTitle} ?: 'Social Blog'">Social Blog</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <style>
+        html {
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+
+        ::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c7c7c7;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body class="bg-neutral-50 text-neutral-900">
+        <!-- Navbar -->
+        <header th:replace="~{layout/fragments/_navbar :: navbar}"></header>
+        
+        <!-- Main Content -->
+        <main class="min-h-[calc(100vh-180px)]">
+            <div class="max-w-5xl mx-auto px-4 py-6">
+                <th:block th:replace="${content}" />
+            </div>
+        </main>
+        
+        <!-- Footer -->
+        <footer th:replace="~{layout/fragments/_footer :: footer}"></footer>
+
+    <!-- Scripts -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-auto-hide]').forEach(el => {
+                setTimeout(() => el.classList.add('opacity-0', 'pointer-events-none'), 4000);
+            });
+        });
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('[data-confirm]');
+            if (btn) {
+                const msg = btn.getAttribute('data-confirm') || 'Xác nhận thực hiện?';
+                if (!confirm(msg)) { e.preventDefault(); }
+            }
+        });
+
+        document.querySelectorAll('[data-toggle-password]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                const input = e.target.previousElementSibling;
+                input.type = input.type === 'password' ? 'text' : 'password';
+            });
+        });
+    </script>
+</body>
+
+</html>
