@@ -1,23 +1,248 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" 
-    th:with="pageTitle='Bài viết của tôi', content='this :: content'"
-    th:replace="~{layout/base :: layout(~{::content})}">
+<html xmlns:th="http://www.thymeleaf.org">
 
-<body>
-    <section th:fragment="content">
-        <div class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-            <h1 class="text-lg font-semibold mb-4">Bài viết</h1>
-            <div class="divide-y divide-neutral-200" th:if="${posts}">
-                <div th:each="p : ${posts}" class="py-4 flex items-center justify-between">
-                    <a th:href="@{|/post/${p.id}|}" class="font-medium hover:underline"
-                        th:text="${#strings.abbreviate(p.content,80)}">Nội dung...</a>
-                    <div class="text-sm text-neutral-500"
-                        th:text="${#temporals.format(p.createdAt,'dd/MM/yyyy HH:mm')}">time</div>
-                </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách bài viết</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .table-actions {
+            min-width: 150px;
+        }
+
+        .post-preview {
+            max-height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .visibility-badge {
+            font-size: 0.8rem;
+        }
+
+        .search-box {
+            border-radius: 25px;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-blog"></i> Social Blog - Quản lý
+            </a>
+            <div class="ms-auto">
+                <a href="/" class="btn btn-light btn-sm">
+                    <i class="fas fa-home"></i> Trang chủ
+                </a>
             </div>
-            <div th:if="${posts == null or #lists.isEmpty(posts)}" class="text-neutral-500">Chưa có bài viết.</div>
         </div>
-    </section>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <h2><i class="fas fa-list"></i> Danh sách bài viết</h2>
+            </div>
+            <div class="col-auto">
+                <a th:href="@{/post/create}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Tạo bài viết mới
+                </a>
+            </div>
+        </div>
+
+        <!-- Thông báo -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle"></i> <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Filters & Search -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form method="get" action="/post/list">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control search-box" name="search"
+                                    placeholder="Tìm kiếm bài viết..." th:value="${param.search}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="visibility">
+                                <option value="">Tất cả chế độ</option>
+                                <option value="PUBLIC" th:selected="${param.visibility == 'PUBLIC'}">Public</option>
+                                <option value="FRIENDS" th:selected="${param.visibility == 'FRIENDS'}">Friends</option>
+                                <option value="PRIVATE" th:selected="${param.visibility == 'PRIVATE'}">Private</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" name="sort">
+                                <option value="newest" th:selected="${param.sort == 'newest'}">Mới nhất</option>
+                                <option value="oldest" th:selected="${param.sort == 'oldest'}">Cũ nhất</option>
+                                <option value="most_liked" th:selected="${param.sort == 'most_liked'}">Nhiều like
+                                </option>
+                                <option value="most_commented" th:selected="${param.sort == 'most_commented'}">Nhiều
+                                    comment</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-filter"></i> Lọc
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Posts Table -->
+        <div class="card shadow">
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(posts)}" class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">Không tìm thấy bài viết nào</h4>
+                </div>
+
+                <div th:if="${!#lists.isEmpty(posts)}" class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                <th style="width: 60px;">Avatar</th>
+                                <th>Tác giả</th>
+                                <th style="width: 40%;">Nội dung</th>
+                                <th class="text-center">Chế độ</th>
+                                <th class="text-center"><i class="fas fa-thumbs-up"></i></th>
+                                <th class="text-center"><i class="fas fa-comment"></i></th>
+                                <th>Thời gian</th>
+                                <th class="text-center table-actions">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="post, iterStat : ${posts}">
+                                <td th:text="${iterStat.count}"></td>
+                                <td>
+                                    <img th:src="${post.author.avatarUrl != null ? post.author.avatarUrl : 'https://via.placeholder.com/40'}"
+                                        alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px;">
+                                </td>
+                                <td>
+                                    <strong th:text="${post.author.fullName}"></strong><br>
+                                    <small class="text-muted" th:text="'@' + ${post.author.username}"></small>
+                                </td>
+                                <td>
+                                    <div class="post-preview" th:text="${post.content}"></div>
+                                    <span th:if="${post.imageUrl}" class="badge bg-info mt-1">
+                                        <i class="fas fa-image"></i> Có hình ảnh
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge visibility-badge"
+                                        th:classappend="${post.visibility == 'PUBLIC' ? 'bg-success' : 
+                                                          (post.visibility == 'FRIENDS' ? 'bg-warning' : 'bg-secondary')}"
+                                        th:text="${post.visibility}"></span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary" th:text="${post.likeCount}"></span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-info" th:text="${post.commentCount}"></span>
+                                </td>
+                                <td>
+                                    <small th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy')}"></small><br>
+                                    <small class="text-muted"
+                                        th:text="${#temporals.format(post.createdAt, 'HH:mm')}"></small>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/post/{id}(id=${post.id})}" class="btn btn-outline-primary"
+                                            title="Xem chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a th:href="@{/post/{id}/edit(id=${post.id})}" class="btn btn-outline-warning"
+                                            title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                                            th:data-bs-target="'#deleteModal' + ${post.id}" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" th:id="'deleteModal' + ${post.id}">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title">Xác nhận xóa</h5>
+                                                    <button type="button" class="btn-close btn-close-white"
+                                                        data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Bạn có chắc chắn muốn xóa bài viết này?</p>
+                                                    <div class="bg-light p-2 rounded">
+                                                        <small class="text-muted">Nội dung:</small><br>
+                                                        <span
+                                                            th:text="${#strings.abbreviate(post.content, 100)}"></span>
+                                                    </div>
+                                                    <p class="text-danger mt-2 mb-0">
+                                                        <i class="fas fa-exclamation-triangle"></i>
+                                                        Hành động này không thể hoàn tác!
+                                                    </p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Hủy</button>
+                                                    <form th:action="@{/post/{id}/delete(id=${post.id})}" method="post"
+                                                        class="d-inline">
+                                                        <button type="submit" class="btn btn-danger">
+                                                            <i class="fas fa-trash"></i> Xóa
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination (nếu có) -->
+                <nav th:if="${totalPages > 1}">
+                    <ul class="pagination justify-content-center mt-3">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/post/list(page=${currentPage - 1})}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link" th:href="@{/post/list(page=${i})}" th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/post/list(page=${currentPage + 1})}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

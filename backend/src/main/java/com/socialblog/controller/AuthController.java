@@ -1,135 +1,83 @@
 package com.socialblog.controller;
 
+import com.socialblog.dto.LoginRequest;
 import com.socialblog.dto.RegisterRequest;
-import com.socialblog.model.entity.User;
-import com.socialblog.model.enums.Role;
-import com.socialblog.repository.UserRepository;
+import com.socialblog.dto.UserDTO;
+import com.socialblog.service.AuthService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
+@RequestMapping("/auth")
 @RequiredArgsConstructor
-@Slf4j
 public class AuthController {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
-    @GetMapping("/login")
-    public String loginPage(
-            @RequestParam(value = "error", required = false) String error,
-            @RequestParam(value = "logout", required = false) String logout,
-            Model model) {
-
-        if (error != null) {
-            model.addAttribute("errorMessage", "Sai tên đăng nhập hoặc mật khẩu!");
-        }
-        if (logout != null) {
-            model.addAttribute("logoutMessage", "Đăng xuất thành công!");
-        }
-
-        return "Auth/login";
-    }
-
+    // Hiển thị trang đăng ký
     @GetMapping("/register")
-    public String registerPage(Model model) {
-        model.addAttribute("user", new RegisterRequest());
+    public String showRegisterPage() {
         return "Auth/register";
     }
 
+    // Xử lý đăng ký
     @PostMapping("/register")
-    public String register(
-            @ModelAttribute("user") RegisterRequest form,
-            BindingResult bindingResult,
-            Model model,
+    public String register(@ModelAttribute RegisterRequest request,
             RedirectAttributes redirectAttributes) {
-
         try {
-            // Validate dữ liệu đầu vào
-            if (form.getUsername() == null || form.getUsername().trim().isEmpty()) {
-                model.addAttribute("errorMessage", "Tên đăng nhập không được để trống!");
-                return "Auth/register";
-            }
-
-            if (form.getPassword() == null || form.getPassword().length() < 6) {
-                model.addAttribute("errorMessage", "Mật khẩu phải có ít nhất 6 ký tự!");
-                return "Auth/register";
-            }
-
-            // Kiểm tra xác nhận mật khẩu
-            if (form.getConfirmPassword() == null || !form.getPassword().equals(form.getConfirmPassword())) {
-                model.addAttribute("errorMessage", "Mật khẩu xác nhận không khớp!");
-                return "Auth/register";
-            }
-
-            if (form.getEmail() == null || !form.getEmail().contains("@")) {
-                model.addAttribute("errorMessage", "Email không hợp lệ!");
-                return "Auth/register";
-            }
-
-            // Validate địa chỉ
-            if (form.getAddress() == null || form.getAddress().trim().isEmpty()) {
-                model.addAttribute("errorMessage", "Địa chỉ không được để trống!");
-                return "Auth/register";
-            }
-
-            // Validate CCCD (12 số)
-            if (form.getCitizenId() == null || !form.getCitizenId().matches("\\d{12}")) {
-                model.addAttribute("errorMessage", "CCCD phải có đúng 12 số!");
-                return "Auth/register";
-            }
-
-            // Kiểm tra username đã tồn tại
-            if (userRepository.existsByUsername(form.getUsername())) {
-                model.addAttribute("errorMessage", "Username đã tồn tại!");
-                return "Auth/register";
-            }
-
-            // Kiểm tra email đã tồn tại
-            if (userRepository.existsByEmail(form.getEmail())) {
-                model.addAttribute("errorMessage", "Email đã tồn tại!");
-                return "Auth/register";
-            }
-
-            // Tạo user mới
-            User user = User.builder()
-                    .username(form.getUsername().trim())
-                    .fullName(form.getFullName() != null ? form.getFullName().trim() : form.getUsername())
-                    .email(form.getEmail().trim().toLowerCase())
-                    .phoneNumber(form.getPhoneNumber())
-                    .dateOfBirth(form.getDateOfBirth())
-                    .gender(form.getGender())
-                    .address(form.getAddress().trim())
-                    .citizenId(form.getCitizenId().trim())
-                    .password(passwordEncoder.encode(form.getPassword()))
-                    .active(true)
-                    .verified(false)
-                    .role(Role.USER)
-                    .build();
-
-            userRepository.save(user);
-
-            log.info("Đăng ký thành công user: {}", user.getUsername());
-
-            redirectAttributes.addFlashAttribute("successMessage", "Đăng ký thành công! Vui lòng đăng nhập.");
-            return "redirect:/login";
-
+            authService.register(request);
+            redirectAttributes.addFlashAttribute("success", "Đăng ký thành công! Vui lòng đăng nhập.");
+            return "redirect:/auth/login";
         } catch (Exception e) {
-            log.error("Lỗi khi đăng ký: ", e);
-            model.addAttribute("errorMessage", "Có lỗi xảy ra, vui lòng thử lại!");
-            return "Auth/register";
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/auth/register";
         }
     }
 
-    @GetMapping("/home")
-    public String home() {
-        return "Post/home";
+    // Hiển thị trang đăng nhập
+    @GetMapping("/login")
+    public String showLoginPage() {
+        return "Auth/login";
     }
 
+    // Xử lý đăng nhập
+    @PostMapping("/login")
+    public String login(@ModelAttribute LoginRequest request,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        try {
+            UserDTO user = authService.login(request);
+
+            // Lưu thông tin user vào session
+            session.setAttribute("currentUser", user);
+            session.setAttribute("userId", user.getId());
+            session.setAttribute("username", user.getUsername());
+
+            return "redirect:/";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/auth/login";
+        }
+    }
+
+    // Đăng xuất
+    @GetMapping("/logout")
+    public String logout(HttpSession session, RedirectAttributes redirectAttributes) {
+        session.invalidate();
+        redirectAttributes.addFlashAttribute("success", "Đăng xuất thành công!");
+        return "redirect:/auth/login";
+    }
+
+    // Check authentication (helper method for other controllers)
+    public static Long getCurrentUserId(HttpSession session) {
+        return (Long) session.getAttribute("userId");
+    }
+
+    public static UserDTO getCurrentUser(HttpSession session) {
+        return (UserDTO) session.getAttribute("currentUser");
+    }
 }

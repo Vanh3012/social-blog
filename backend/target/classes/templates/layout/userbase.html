@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} ?: 'Social Blog'">Social Blog</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+
+<body class="bg-neutral-100 text-neutral-800">
+
+    <!-- NAVBAR -->
+    <header th:replace="~{layout/fragments/_navbar :: navbar}"></header>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-3xl mx-auto mt-6 px-4">
+        <th:block th:replace="${content}" />
+    </main>
+
+    <!-- FOOTER -->
+    <footer th:replace="~{layout/fragments/_footer :: footer}"></footer>
+
+</body>
+
+</html>

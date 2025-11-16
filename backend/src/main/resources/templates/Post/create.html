@@ -1,63 +1,73 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-    th:with="pageTitle='Tạo bài viết', content='this :: content'" 
-    th:replace="~{layout/base :: layout(~{::content})}">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/userbase :: layout(~{::content})}">
 
 <body>
-    <section th:fragment="content">
-        <div class="max-w-2xl mx-auto">
-            <div class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-                <h1 class="text-xl font-semibold mb-6">✏️ Tạo bài viết mới</h1>
+    <section th:fragment="content" x-data="{ images: [], files: [] }">
 
-                <form th:action="@{/post/create}" th:object="${post}" method="post" x-data="{loading:false}"
-                    @submit="loading=true">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <div class="max-w-xl mx-auto bg-white rounded-xl border p-6 shadow-sm">
 
-                    <div class="space-y-4">
-                        <div>
-                            <label for="content" class="block text-sm font-medium mb-2">Nội dung bài viết *</label>
-                            <textarea id="content" th:field="*{content}" rows="6" required
-                                placeholder="Bạn đang nghĩ gì?"
-                                class="w-full rounded-xl border border-neutral-300 px-3 py-2 focus:ring-2 focus:ring-neutral-900 resize-none"></textarea>
+            <h2 class="text-xl font-semibold mb-4">Tạo bài viết</h2>
+
+            <!-- Form -->
+            <form th:action="@{/post/create}" method="post" enctype="multipart/form-data">
+
+                <!-- Nội dung -->
+                <textarea name="content" rows="3" class="w-full border rounded-lg p-3 mb-4 resize-none"
+                    placeholder="Bạn đang nghĩ gì?"></textarea>
+
+                <!-- Upload ảnh -->
+                <div class="mb-3">
+                    <label class="block mb-1 font-medium">Chọn ảnh</label>
+
+                    <!-- input file real -->
+                    <input type="file" x-ref="fileInput" name="images" multiple accept="image/*" class="hidden" @change="
+                            images = [];
+                            files = [...$refs.fileInput.files];
+
+                            files.forEach(file => {
+                                const reader = new FileReader();
+                                reader.onload = e => images.push(e.target.result);
+                                reader.readAsDataURL(file);
+                            });
+                       ">
+
+                    <button type="button" @click="$refs.fileInput.click()"
+                        class="px-4 py-2 bg-neutral-900 text-white rounded-lg">
+                        Chọn ảnh
+                    </button>
+                </div>
+
+                <!-- Preview ảnh -->
+                <div class="grid grid-cols-3 gap-3 mb-4" x-show="images.length > 0">
+                    <template x-for="(img, i) in images" :key="i">
+                        <div class="relative group">
+
+                            <img :src="img" class="w-full h-28 object-cover rounded-lg border">
+
+                            <!-- nút xóa -->
+                            <button type="button" @click="images.splice(i,1); files.splice(i,1)" class="absolute top-1 right-1 w-6 h-6 bg-black/60 text-white rounded-full
+                                       hidden group-hover:flex items-center justify-center">
+                                ✕
+                            </button>
                         </div>
+                    </template>
+                </div>
 
-                        <div>
-                            <label for="imageUrl" class="block text-sm font-medium mb-2">URL hình ảnh (tùy chọn)</label>
-                            <input type="text" id="imageUrl" th:field="*{imageUrl}"
-                                placeholder="https://example.com/image.jpg"
-                                class="w-full rounded-xl border border-neutral-300 px-3 py-2 focus:ring-2 focus:ring-neutral-900">
-                        </div>
+                <!-- Visibility -->
+                <select name="visibility" class="w-full border rounded-lg p-2 mb-4">
+                    <option value="PUBLIC">Công khai</option>
+                    <option value="FRIENDS">Bạn bè</option>
+                    <option value="PRIVATE">Chỉ mình tôi</option>
+                </select>
 
-                        <div>
-                            <label for="visibility" class="block text-sm font-medium mb-2">Chế độ hiển thị *</label>
-                            <select id="visibility" th:field="*{visibility}" required
-                                class="w-full rounded-xl border border-neutral-300 px-3 py-2 focus:ring-2 focus:ring-neutral-900">
-                                <option th:each="v : ${visibilities}" th:value="${v}" th:text="${v.toString() == 'PUBLIC' ? '🌍 Công khai' : 
-                                             (v.toString() == 'FRIENDS' ? '👥 Bạn bè' : '🔒 Riêng tư')}">
-                                </option>
-                            </select>
-                            <div class="mt-2 text-xs text-neutral-500 space-y-1">
-                                <div>🌍 Công khai: Mọi người đều xem được</div>
-                                <div>👥 Bạn bè: Chỉ bạn bè mới xem được</div>
-                                <div>🔒 Riêng tư: Chỉ mình bạn xem được</div>
-                            </div>
-                        </div>
-                    </div>
+                <button class="w-full bg-neutral-900 text-white py-2 rounded-lg hover:bg-black">
+                    Đăng bài
+                </button>
 
-                    <div class="mt-6 flex items-center gap-3">
-                        <a th:href="@{/}"
-                            class="flex-1 text-center rounded-lg border border-neutral-300 px-4 py-2.5 text-sm hover:bg-neutral-100 transition">
-                            Hủy
-                        </a>
-                        <button type="submit"
-                            class="flex-1 rounded-lg bg-neutral-900 text-white px-4 py-2.5 hover:bg-black disabled:opacity-50 transition"
-                            :disabled="loading" x-text="loading?'Đang đăng...':'Đăng bài'">
-                            Đăng bài
-                        </button>
-                    </div>
-                </form>
-            </div>
+            </form>
+
         </div>
+
     </section>
 </body>
 

@@ -1,6 +1,9 @@
 spring:
   application:
     name: social-blog
+  web:
+    resources:
+      static-locations: classpath:/static/, file:uploads/
 
   datasource:
     url: jdbc:mysql://localhost:3306/social_blog?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
@@ -42,5 +45,4 @@ logging:
   level:
     root: INFO
     com.socialblog: DEBUG
-    org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG

@@ -1,22 +1,21 @@
 package com.socialblog.controller;
 
 import com.socialblog.dto.PostRequest;
-import com.socialblog.model.entity.Comment;
+import com.socialblog.dto.UserDTO;
 import com.socialblog.model.entity.Post;
 import com.socialblog.model.entity.User;
 import com.socialblog.model.enums.Visibility;
 import com.socialblog.repository.UserRepository;
-import com.socialblog.service.CommentService;
 import com.socialblog.service.PostService;
-import com.socialblog.service.ReactionService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.socialblog.dto.CommentRequest;
 
 import java.util.List;
 
@@ -27,160 +26,68 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
-    private final CommentService commentService;
-    private final ReactionService reactionService;
     private final UserRepository userRepository;
 
-    // Hiển thị form tạo bài viết
+    // HIỂN THỊ FORM TẠO BÀI
     @GetMapping("/create")
-    public String createPostForm(Model model) {
+    public String showCreateForm(HttpSession session, Model model, RedirectAttributes ra) {
+        UserDTO currentUser = (UserDTO) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            ra.addFlashAttribute("error", "Bạn cần đăng nhập để đăng bài");
+            return "redirect:/auth/login";
+        }
+
         model.addAttribute("post", new PostRequest());
         model.addAttribute("visibilities", Visibility.values());
-        return "post/create";
+        return "Post/create"; // nhớ tạo file Post/create.html
     }
 
-    // Xử lý tạo bài viết
+    // XỬ LÝ SUBMIT FORM TẠO BÀI
     @PostMapping("/create")
     public String createPost(
             @ModelAttribute("post") PostRequest request,
-            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam("images") MultipartFile[] images,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
 
+        UserDTO cur = (UserDTO) session.getAttribute("currentUser");
+        if (cur == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bạn phải đăng nhập!");
+            return "redirect:/auth/login";
+        }
+
+        User user = userRepository.findById(cur.getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+
         try {
-            User user = userRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
-
-            // Validate
-            if (request.getContent() == null || request.getContent().trim().isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Nội dung không được để trống!");
-                return "redirect:/post/create";
-            }
-
-            postService.createPost(request, user);
-
-            redirectAttributes.addFlashAttribute("successMessage", "Tạo bài viết thành công!");
+            postService.createPost(request, user, List.of(images));
+            redirectAttributes.addFlashAttribute("successMessage", "Đăng bài thành công!");
             return "redirect:/";
-
         } catch (Exception e) {
-            log.error("Lỗi khi tạo bài viết: ", e);
             redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra!");
             return "redirect:/post/create";
         }
     }
 
-    // Xem chi tiết bài viết
+    // XEM CHI TIẾT BÀI VIẾT
     @GetMapping("/{id}")
-    public String viewPost(
-            @PathVariable Long id,
-            @AuthenticationPrincipal UserDetails userDetails,
+    public String viewPost(@PathVariable Long id,
+            HttpSession session,
             Model model,
-            RedirectAttributes redirectAttributes) {
-
+            RedirectAttributes ra) {
         try {
             Post post = postService.getPostById(id);
-            List<Comment> comments = commentService.getCommentsByPost(id);
-
-            if (userDetails != null) {
-                User currentUser = userRepository.findByUsername(userDetails.getUsername())
-                        .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
-
-                model.addAttribute("currentUser", currentUser);
-                model.addAttribute("hasReacted", reactionService.hasUserReacted(id, currentUser));
-            }
-
             model.addAttribute("post", post);
-            model.addAttribute("comments", comments);
 
-            return "post/detail"; // ✅ sửa
+            UserDTO currentUser = (UserDTO) session.getAttribute("currentUser");
+            model.addAttribute("currentUser", currentUser);
+            model.addAttribute("newComment", new CommentRequest());
+            return "Post/detail"; // sẽ chứa comment + reaction luôn
 
         } catch (Exception e) {
-            log.error("Lỗi khi xem bài viết: ", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy bài viết!");
+            log.error("Lỗi xem bài viết", e);
+            ra.addFlashAttribute("error", "Không tìm thấy bài viết");
             return "redirect:/";
-        }
-    }
-
-    // Xóa bài viết
-    @PostMapping("/{id}/delete")
-    public String deletePost(
-            @PathVariable Long id,
-            @AuthenticationPrincipal UserDetails userDetails,
-            RedirectAttributes redirectAttributes) {
-
-        try {
-            User user = userRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
-
-            postService.deletePost(id, user);
-
-            redirectAttributes.addFlashAttribute("successMessage", "Xóa bài viết thành công!");
-            return "redirect:/";
-
-        } catch (Exception e) {
-            log.error("Lỗi khi xóa bài viết: ", e);
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/post/" + id;
-        }
-    }
-
-    // Sửa bài viết - Form
-    @GetMapping("/{id}/edit")
-    public String editPostForm(
-            @PathVariable Long id,
-            @AuthenticationPrincipal UserDetails userDetails,
-            Model model,
-            RedirectAttributes redirectAttributes) {
-
-        try {
-            User user = userRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
-
-            Post post = postService.getPostById(id);
-
-            if (!post.getAuthor().getId().equals(user.getId())) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền sửa bài viết này!");
-                return "redirect:/post/" + id;
-            }
-
-            PostRequest postRequest = new PostRequest();
-            postRequest.setContent(post.getContent());
-            postRequest.setImageUrl(post.getImageUrl());
-            postRequest.setVisibility(post.getVisibility());
-
-            model.addAttribute("post", postRequest);
-            model.addAttribute("postId", id);
-            model.addAttribute("visibilities", Visibility.values());
-
-            return "post/edit"; // ✅ sửa
-
-        } catch (Exception e) {
-            log.error("Lỗi khi mở form sửa: ", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra!");
-            return "redirect:/";
-        }
-    }
-
-    // Sửa bài viết - Submit
-    @PostMapping("/{id}/edit")
-    public String editPost(
-            @PathVariable Long id,
-            @ModelAttribute("post") PostRequest request,
-            @AuthenticationPrincipal UserDetails userDetails,
-            RedirectAttributes redirectAttributes) {
-
-        try {
-            User user = userRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
-
-            postService.updatePost(id, request, user);
-
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật bài viết thành công!");
-            return "redirect:/post/" + id;
-
-        } catch (Exception e) {
-            log.error("Lỗi khi cập nhật bài viết: ", e);
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/post/" + id + "/edit";
         }
     }
 }

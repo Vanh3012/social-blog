@@ -19,9 +19,6 @@ public class Post extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "image_url")
-    private String imageUrl;
-
     @Enumerated(EnumType.STRING)
     private Visibility visibility = Visibility.PUBLIC;
 
@@ -37,11 +34,6 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-    // ===== Nếu cần user_id riêng (ví dụ người đăng lại) =====
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
     // ===== Quan hệ với Reaction =====
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reaction> reactions = new ArrayList<>();
@@ -49,6 +41,10 @@ public class Post extends BaseEntity {
     // ===== Quan hệ với Comment =====
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+
+    // ===== Quan hệ với PostImage =====
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostImage> images = new ArrayList<>();
 
     // ===== Helper methods để tính toán count =====
     public int getLikeCount() {

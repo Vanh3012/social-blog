@@ -5,7 +5,8 @@ import lombok.Data;
 
 @Data
 public class PostRequest {
+
     private String content;
-    private String imageUrl;
+    private String imageUrls;
     private Visibility visibility = Visibility.PUBLIC;
 }

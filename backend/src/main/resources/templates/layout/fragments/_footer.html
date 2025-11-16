@@ -1,16 +1,10 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 
-<body>
-    <footer class="border-t border-neutral-200 bg-white">
-        <div class="max-w-5xl mx-auto px-4 py-6 text-sm text-neutral-500 flex items-center justify-between">
-            <span>© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2025</span> SocialBlog</span>
-            <div class="space-x-4">
-                <a href="/about" class="hover:text-neutral-800">About</a>
-                <a href="/contact" class="hover:text-neutral-800">Contact</a>
-            </div>
-        </div>
-    </footer>
-</body>
+<footer th:fragment="footer" class="mt-10 py-6 text-center text-neutral-500 text-sm">
+
+    <p>© 2025 Social Blog — Built with Spring Boot & Thymeleaf</p>
+
+</footer>
 
 </html>

@@ -1,10 +1,12 @@
 package com.socialblog.dto;
 
 import com.socialblog.model.enums.ReactionType;
-import lombok.Data;
+import lombok.*;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReactionRequest {
     private Long postId;
-    private ReactionType type;
+    private ReactionType type; // LIKE, LOVE, HAHA, WOW, SAD, ANGRY
 }

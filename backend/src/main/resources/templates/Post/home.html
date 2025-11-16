@@ -1,129 +1,117 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-    th:replace="~{layout/base :: layout(~{::content})}">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/userbase :: layout(~{::content})}">
 
 <body>
-    <div th:fragment="content">
-        <div class="grid md:grid-cols-[1fr] gap-6">
-            <!-- Phần nội dung giữ nguyên -->
-            <div>
-                <!-- Composer -->
-                <div sec:authorize="isAuthenticated()"
-                    class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm mb-4">
-                    <form th:action="@{/post/create}" method="post" x-data="{loading:false}" @submit="loading=true">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <section th:fragment="content">
 
-                        <textarea name="content" rows="2" placeholder="Chia sẻ gì đó..." required
-                            class="w-full resize-none rounded-xl border border-neutral-300 px-3 py-2 focus:ring-2 focus:ring-neutral-900"></textarea>
+        <div class="max-w-2xl mx-auto space-y-6">
 
-                        <div class="mt-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                            <input name="imageUrl" placeholder="Link hình (tùy chọn)"
-                                class="flex-1 rounded-xl border border-neutral-300 px-3 py-2 focus:ring-2 focus:ring-neutral-900">
+            <div th:each="post : ${posts}" class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
 
-                            <select name="visibility"
-                                class="rounded-xl border border-neutral-300 px-3 py-2 focus:ring-2 focus:ring-neutral-900">
-                                <option value="PUBLIC">🌍 Công khai</option>
-                                <option value="FRIENDS">👥 Bạn bè</option>
-                                <option value="PRIVATE">🔒 Riêng tư</option>
-                            </select>
+                <!-- ================= HEADER ================= -->
+                <header class="flex items-center gap-3 mb-4">
 
-                            <button type="submit"
-                                class="rounded-lg bg-neutral-900 text-white px-4 py-2.5 hover:bg-black disabled:opacity-50 whitespace-nowrap"
-                                :disabled="loading" x-text="loading?'Đang đăng...':'Đăng bài'">Đăng bài</button>
+                    <!-- Avatar -->
+                    <div>
+                        <img th:if="${post.author.avatarUrl != null}" th:src="${post.author.avatarUrl}"
+                            class="w-10 h-10 rounded-full object-cover">
+
+                        <div th:if="${post.author.avatarUrl == null}" class="w-10 h-10 rounded-full bg-neutral-300">
                         </div>
-                    </form>
-                </div>
+                    </div>
 
-                <!-- Feed -->
-                <div class="space-y-4">
-                    <div th:each="post : ${posts}" class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-neutral-900 to-neutral-600 flex items-center justify-center text-white font-semibold"
-                                    th:text="${post.author.fullName != null ? #strings.substring(post.author.fullName, 0, 1) : 'U'}">
-                                    U
-                                </div>
-                                <div>
-                                    <div class="font-medium" th:text="${post.author.fullName ?: post.author.username}">
-                                        Tên</div>
-                                    <div class="text-xs text-neutral-500"
-                                        th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy HH:mm')}">time</div>
-                                </div>
-                            </div>
-                            <div class="text-xs px-2 py-1 rounded bg-neutral-100 text-neutral-600" th:text="${post.visibility.toString() == 'PUBLIC' ? '🌍' : 
-                                         (post.visibility.toString() == 'FRIENDS' ? '👥' : '🔒')}">
-                                🌍
-                            </div>
-                        </div>
+                    <!-- Tên + thời gian -->
+                    <div>
+                        <p class="font-semibold text-sm" th:text="${post.author.username}"></p>
+                        <p class="text-xs text-neutral-500"
+                            th:text="${#temporals.format(post.createdAt,'dd/MM/yyyy HH:mm')}"></p>
+                    </div>
 
-                        <div class="mt-3 whitespace-pre-wrap text-neutral-900" th:text="${post.content}">Nội dung...
-                        </div>
+                </header>
 
-                        <img th:if="${post.imageUrl != null and !#strings.isEmpty(post.imageUrl)}"
-                            th:src="${post.imageUrl}" alt="Post image"
-                            class="mt-3 rounded-xl border border-neutral-200 w-full object-cover max-h-96" />
+                <!-- ================= CONTENT ================= -->
+                <p class="text-sm mb-3" th:text="${post.content}"></p>
 
-                        <div
-                            class="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between text-sm text-neutral-600">
-                            <div class="flex items-center gap-4">
-                                <span>❤️ <span th:text="${post.likeCount}">0</span></span>
-                                <span>💬 <span th:text="${post.commentCount}">0</span></span>
-                            </div>
-                        </div>
-
-                        <div class="mt-3 flex items-center gap-2">
-                            <button sec:authorize="isAuthenticated()" onclick="toggleReactionForm(this)" type="button"
-                                class="flex-1 rounded-lg border border-neutral-300 px-3 py-2 text-sm hover:bg-neutral-50 transition">
-                                Thả cảm xúc
-                            </button>
-                            <a th:href="@{|/post/${post.id}|}"
-                                class="flex-1 text-center rounded-lg border border-neutral-300 px-3 py-2 text-sm hover:bg-neutral-50 transition">
-                                Xem chi tiết
-                            </a>
-                        </div>
-
-                        <!-- Reaction form -->
-                        <div class="mt-2 hidden reaction-form" sec:authorize="isAuthenticated()">
-                            <form th:action="@{/reaction/add}" method="post" class="flex items-center gap-2">
-                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                <input type="hidden" name="postId" th:value="${post.id}" />
-                                <select name="type" required
-                                    class="flex-1 rounded-lg border border-neutral-300 px-2 py-1.5 text-sm">
-                                    <option value="LIKE">👍 Like</option>
-                                    <option value="LOVE">❤️ Love</option>
-                                    <option value="HAHA">😂 Haha</option>
-                                    <option value="WOW">😮 Wow</option>
-                                    <option value="SAD">😢 Sad</option>
-                                    <option value="ANGRY">😠 Angry</option>
-                                </select>
-                                <button type="submit"
-                                    class="rounded-lg bg-neutral-900 text-white px-3 py-1.5 text-sm hover:bg-black">
-                                    Gửi
-                                </button>
-                            </form>
-                        </div>
+                <!-- Hình Ảnh -->
+                <div th:if="${post.images != null and !#lists.isEmpty(post.images)}" class="grid gap-2" th:classappend="${#lists.size(post.images) == 1 ? 'grid-cols-1' :
+                                  (#lists.size(post.images) == 2 ? 'grid-cols-2' :
+                                  (#lists.size(post.images) == 3 ? 'grid-cols-2 grid-rows-2' :
+                                  'grid-cols-3'))}">
+                    <div th:each="img : ${post.images}">
+                        <img th:src="@{'/uploads/' + ${img.imageUrl}}" class="rounded-xl w-full object-cover max-h-80">
                     </div>
                 </div>
 
-                <div th:if="${posts == null or #lists.isEmpty(posts)}"
-                    class="text-center text-neutral-500 py-16 bg-white rounded-2xl border border-neutral-200">
-                    <div class="text-4xl mb-2">📭</div>
-                    <p>Chưa có bài viết nào.</p>
-                    <a sec:authorize="isAuthenticated()" th:href="@{/post/create}"
-                        class="inline-block mt-4 text-neutral-900 underline underline-offset-4">
-                        Tạo bài viết đầu tiên
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+                <!-- ================= FOOTER ================= -->
+                <footer class="mt-3 pt-3 border-t text-sm text-neutral-600">
+                
+                    <div class="flex items-center justify-between">
+                
+                        <!-- LIKE + REACTIONS -->
+                        <div class="relative" x-data="{ open: false }">
+                
+                            <!-- Nút Like -->
+                            <button @mouseenter="open = true" @mouseleave="open = false"
+                                class="px-3 py-1 rounded-lg hover:bg-neutral-100 flex items-center gap-1">
+                
+                                <img src="/reactions/like.png" class="w-5 h-5 object-contain">
+                                <span>Thích</span>
+                            </button>
+                
+                            <!-- Popup Reaction -->
+                            <div x-show="open" @mouseenter="open = true" @mouseleave="open = false" x-transition class="absolute bottom-full left-0 mb-2 bg-white border rounded-full px-3 py-2 shadow-lg 
+                                        flex items-center gap-3 z-50 h-14">
+                            
+                                <template x-for="(r, index) in [
+                                    {type:'LIKE',  src:'/reactions/like.png'},
+                                    {type:'LOVE',  src:'/reactions/love.png'},
+                                    {type:'HAHA',  src:'/reactions/haha.png'},
+                                    {type:'WOW',   src:'/reactions/wow.png'},
+                                    {type:'SAD',   src:'/reactions/sad.png'},
+                                    {type:'ANGRY', src:'/reactions/angry.png'}
+                                ]" :key="index">
+                            
+                                    <button @click="sendReaction(r.type, [[${post.id}]])"
+                                        class="hover:scale-125 transition duration-150 flex items-center justify-center">
+                            
+                                        <!-- FIX QUAN TRỌNG: ép width + height cố định -->
+                                        <img :src="r.src" class="w-10 h-10 shrink-0 object-contain rounded-full bg-white">
+                                    </button>
+                            
+                                </template>
+                            </div>
 
+                
+                        </div>
+                
+                        <!-- Xem chi tiết -->
+                        <a th:href="@{/post/{id}(id=${post.id})}" class="text-blue-600 hover:underline">
+                            Xem chi tiết →
+                        </a>
+                    </div>
+                
+                    <!-- Like & Comment Count -->
+                    <div class="mt-1 text-xs text-neutral-500">
+                        <span th:text="${post.likeCount} + ' lượt thích'"></span> ·
+                        <span th:text="${post.commentCount} + ' bình luận'"></span>
+                    </div>
+                
+                </footer>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- Reaction script -->
     <script>
-        function toggleReactionForm(button) {
-            const form = button.parentElement.nextElementSibling;
-            form.classList.toggle('hidden');
+        function sendReaction(type, postId) {
+            console.log("Reaction:", type, "Post:", postId);
+            // TODO: gọi API ở đây
         }
     </script>
+
 </body>
 
 </html>

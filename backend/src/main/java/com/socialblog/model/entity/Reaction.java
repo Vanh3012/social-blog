@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "reactions")
+@Table(name = "reactions", uniqueConstraints = @UniqueConstraint(columnNames = { "user_id", "post_id" }))
 public class Reaction extends BaseEntity {
 
         @Enumerated(EnumType.STRING)
