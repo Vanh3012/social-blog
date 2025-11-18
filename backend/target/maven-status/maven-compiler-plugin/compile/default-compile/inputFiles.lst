@@ -25,6 +25,7 @@ D:\VSCode\social-blog\backend\src\main\java\com\socialblog\SocialblogApplication
 D:\VSCode\social-blog\backend\src\main\java\com\socialblog\model\entity\Notification.java
 D:\VSCode\social-blog\backend\src\main\java\com\socialblog\model\BaseEntity.java
 D:\VSCode\social-blog\backend\src\main\java\com\socialblog\model\enums\FriendshipStatus.java
+D:\VSCode\social-blog\backend\src\main\java\com\socialblog\controller\ProfileController.java
 D:\VSCode\social-blog\backend\src\main\java\com\socialblog\repository\PostRepository.java
 D:\VSCode\social-blog\backend\src\main\java\com\socialblog\dto\ReactionRequest.java
 D:\VSCode\social-blog\backend\src\main\java\com\socialblog\repository\ReactionRepository.java

@@ -19,7 +19,7 @@
                     class="w-10 h-10 rounded-full object-cover">
                 <div th:if="${currentUser.avatarUrl == null}"
                     class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
-                    <span th:text="${#strings.substring(currentUser.username, 0, 1).toUpperCase()}"></span>
+                    <span th:text="${#strings.substring(currentUser.fullName, 0, 1).toUpperCase()}"></span>
                 </div>
 
                 <!-- Text placeholder -->
@@ -49,12 +49,12 @@
             <header class="flex items-center justify-between p-4">
                 <div class="flex items-center gap-3">
                     <!-- Avatar -->
-                    <a th:href="@{/profile/{username}(username=${post.author.username})}" class="flex-shrink-0">
+                    <a th:href="@{/profile/{username}(username=${post.author.fullName})}" class="flex-shrink-0">
                         <img th:if="${post.author.avatarUrl != null}" th:src="${post.author.avatarUrl}"
                             class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100">
                         <div th:if="${post.author.avatarUrl == null}"
                             class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-base">
-                            <span th:text="${#strings.substring(post.author.username, 0, 1).toUpperCase()}"></span>
+                            <span th:text="${#strings.substring(post.author.fullName, 0, 1).toUpperCase()}"></span>
                         </div>
                     </a>
 
@@ -62,7 +62,7 @@
                     <div>
                         <a th:href="@{/profile/{username}(username=${post.author.username})}"
                             class="font-semibold text-base text-gray-900 hover:underline"
-                            th:text="${post.author.username}">username</a>
+                            th:text="${post.author.fullName}">fullname</a>
                         <div class="flex items-center gap-1 text-xs text-gray-500">
                             <span th:text="${#temporals.format(post.createdAt,'dd/MM/yyyy')}">time</span>
                             <span>·</span>

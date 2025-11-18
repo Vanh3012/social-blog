@@ -7,7 +7,8 @@
     <section th:fragment="content">
 
         <article class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200"
-            th:data-post-id="${post.id}" th:data-user-reaction="${userReaction}">
+            th:attr="data-post-id=${post.id}, 
+             data-user-reaction=${userReaction}">
 
             <!-- ========== HEADER ========== -->
             <header class="flex items-center justify-between p-4">
@@ -26,7 +27,7 @@
                     <div>
                         <a th:href="@{/profile/{username}(username=${post.author.username})}"
                             class="font-semibold text-base text-gray-900 hover:underline"
-                            th:text="${post.author.username}">username</a>
+                            th:text="${post.author.fullName}">fullName</a>
                         <div class="flex items-center gap-1 text-xs text-gray-500">
                             <span th:text="${#temporals.format(post.createdAt,'dd/MM/yyyy HH:mm')}">time</span>
                             <span>·</span>
@@ -279,21 +280,21 @@
 
                         <div class="flex items-start gap-2">
                             <!-- Avatar -->
-                            <a th:href="@{/profile/{username}(username=${c.author.username})}" class="flex-shrink-0">
+                            <a th:href="@{/profile/{username}(username=${c.author.fullName})}" class="flex-shrink-0">
                                 <img th:if="${c.author.avatarUrl != null}" th:src="${c.author.avatarUrl}"
                                     class="w-8 h-8 rounded-full object-cover">
                                 <div th:if="${c.author.avatarUrl == null}"
                                     class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-semibold text-xs">
-                                    <span th:text="${#strings.substring(c.author.username, 0, 1).toUpperCase()}"></span>
+                                    <span th:text="${#strings.substring(c.author.fullName, 0, 1).toUpperCase()}"></span>
                                 </div>
                             </a>
 
                             <div class="flex-1">
                                 <!-- Nội dung comment -->
                                 <div class="bg-gray-100 px-3 py-2 rounded-2xl inline-block">
-                                    <a th:href="@{/profile/{username}(username=${c.author.username})}"
+                                    <a th:href="@{/profile/{username}(fullName=${c.author.fullName})}"
                                         class="font-semibold text-sm text-gray-900 hover:underline"
-                                        th:text="${c.author.username}">username</a>
+                                        th:text="${c.author.fullName}">fullName</a>
                                     <p class="text-[15px] text-gray-800 mt-0.5" th:text="${c.content}">content</p>
                                 </div>
 
@@ -321,7 +322,7 @@
                                     <div th:if="${session.currentUser.avatarUrl == null}"
                                         class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
                                         <span
-                                            th:text="${#strings.substring(session.currentUser.username, 0, 1).toUpperCase()}"></span>
+                                            th:text="${#strings.substring(session.currentUser.fullName, 0, 1).toUpperCase()}"></span>
                                     </div>
 
                                     <div class="flex-1 flex gap-2">
@@ -339,14 +340,14 @@
                                 <div th:if="${!#lists.isEmpty(c.replies)}" class="mt-3 space-y-3">
                                     <div th:each="r : ${c.replies}" class="flex items-start gap-2">
 
-                                        <a th:href="@{/profile/{username}(username=${r.author.username})}"
+                                        <a th:href="@{/profile/{username}(fullName=${r.author.fullName})}"
                                             class="flex-shrink-0">
                                             <img th:if="${r.author.avatarUrl != null}" th:src="${r.author.avatarUrl}"
                                                 class="w-7 h-7 rounded-full object-cover">
                                             <div th:if="${r.author.avatarUrl == null}"
                                                 class="w-7 h-7 rounded-full bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center text-white font-semibold text-xs">
                                                 <span
-                                                    th:text="${#strings.substring(r.author.username, 0, 1).toUpperCase()}"></span>
+                                                    th:text="${#strings.substring(r.author.fullName, 0, 1).toUpperCase()}"></span>
                                             </div>
                                         </a>
 
@@ -354,7 +355,7 @@
                                             <div class="bg-gray-100 px-3 py-2 rounded-2xl inline-block">
                                                 <a th:href="@{/profile/{username}(username=${r.author.username})}"
                                                     class="font-semibold text-sm text-gray-900 hover:underline"
-                                                    th:text="${r.author.username}">username</a>
+                                                    th:text="${r.author.fullName}">fullName</a>
                                                 <p class="text-[15px] text-gray-800 mt-0.5" th:text="${r.content}">reply
                                                     content</p>
                                             </div>
@@ -387,7 +388,7 @@
                         class="w-8 h-8 rounded-full object-cover flex-shrink-0">
                     <div th:if="${session.currentUser.avatarUrl == null}"
                         class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-                        <span th:text="${#strings.substring(session.currentUser.username, 0, 1).toUpperCase()}"></span>
+                        <span th:text="${#strings.substring(session.currentUser.fullName, 0, 1).toUpperCase()}"></span>
                     </div>
 
                     <div class="flex-1 flex gap-2">

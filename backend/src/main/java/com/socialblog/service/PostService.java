@@ -86,7 +86,7 @@ public class PostService {
     }
 
     public List<Post> getPostsForUser(User user) {
-        return postRepository.findAllByOrderByCreatedAtDesc();
+        return postRepository.findPostsForUser(user.getId());
     }
 
     public Post getPostById(Long id) {

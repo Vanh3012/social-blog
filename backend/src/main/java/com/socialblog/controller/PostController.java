@@ -6,7 +6,9 @@ import com.socialblog.model.entity.Post;
 import com.socialblog.model.entity.User;
 import com.socialblog.model.enums.Visibility;
 import com.socialblog.repository.UserRepository;
+import com.socialblog.repository.ReactionRepository;
 import com.socialblog.service.PostService;
+import com.socialblog.service.ReactionService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.socialblog.dto.CommentRequest;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/post")
@@ -26,7 +30,9 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
+    private final ReactionService reactionService;
     private final UserRepository userRepository;
+    private final ReactionRepository userReaction;
 
     // HIỂN THỊ FORM TẠO BÀI
     @GetMapping("/create")
@@ -39,6 +45,7 @@ public class PostController {
 
         model.addAttribute("post", new PostRequest());
         model.addAttribute("visibilities", Visibility.values());
+        model.addAttribute("currentUser", currentUser);
         return "Post/create"; // nhớ tạo file Post/create.html
     }
 
@@ -81,12 +88,24 @@ public class PostController {
 
             UserDTO currentUser = (UserDTO) session.getAttribute("currentUser");
             model.addAttribute("currentUser", currentUser);
+            String userReaction = null;
+
+            if (currentUser != null) {
+                User userEntity = userRepository.findById(currentUser.getId())
+                        .orElse(null);
+
+                if (userEntity != null) {
+                    userReaction = reactionService.getUserReactionForPost(id, userEntity);
+                }
+            }
+            model.addAttribute("userReaction", userReaction);
             model.addAttribute("newComment", new CommentRequest());
             return "Post/detail"; // sẽ chứa comment + reaction luôn
 
         } catch (Exception e) {
             log.error("Lỗi xem bài viết", e);
             ra.addFlashAttribute("error", "Không tìm thấy bài viết");
+
             return "redirect:/";
         }
     }

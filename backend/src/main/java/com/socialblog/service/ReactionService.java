@@ -28,9 +28,6 @@ public class ReactionService {
         @Transactional
         public long addOrUpdateReaction(ReactionRequest request, User user) {
 
-                log.info("🔄 Processing reaction - User: {}, Post: {}, Type: {}",
-                                user.getId(), request.getPostId(), request.getType());
-
                 // Tìm post
                 Post post = postRepository.findById(request.getPostId())
                                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết!"));
@@ -115,9 +112,9 @@ public class ReactionService {
         /**
          * Lấy reaction của user cho một post
          */
-        public Reaction getUserReactionForPost(Long postId, User user) {
-                Post post = postRepository.findById(postId)
-                                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết!"));
-                return reactionRepository.findByPostAndUser(post, user).orElse(null);
+        public String getUserReactionForPost(Long postId, User user) {
+                return reactionRepository.findReactionType(postId, user.getId())
+                                .orElse(null);
         }
+
 }

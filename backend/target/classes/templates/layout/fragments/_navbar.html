@@ -159,15 +159,15 @@
                         x-transition:leave-end="transform opacity-0 scale-95"
                         class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
                         style="display: none;">
-                        <span th:if="${session.currentUser}">
+                        <span th:if="${currentUser}">
                             <div class="px-4 py-2 border-b border-gray-100">
                                 <p class="text-sm font-semibold text-gray-800"
-                                    th:text="${session.currentUser.username}">User</p>
-                                <p class="text-xs text-gray-500" th:text="${session.currentUser.email}">
+                                    th:text="${currentUser.username}">User</p>
+                                <p class="text-xs text-gray-500" th:text="${currentUser.email}">
                                     email@example.com</p>
                             </div>
 
-                            <a href="/profile"
+                            <a th:href="@{'/user/' + ${currentUser.id}}"
                                 class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-smooth">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -201,7 +201,7 @@
                             </div>
                         </span>
 
-                        <span th:unless="${session.currentUser}">
+                        <span th:unless="${currentUser}">
                             <a href="/auth/login"
                                 class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-smooth">
                                 Đăng nhập

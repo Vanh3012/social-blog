@@ -30,6 +30,7 @@ com\socialblog\repository\ReactionRepository.class
 com\socialblog\model\enums\ReactionType.class
 com\socialblog\repository\FriendshipRepository.class
 com\socialblog\SocialblogApplication.class
+com\socialblog\controller\ProfileController.class
 com\socialblog\model\enums\NotificationType.class
 com\socialblog\model\enums\ConversationType.class
 com\socialblog\dto\CommentDTO.class
