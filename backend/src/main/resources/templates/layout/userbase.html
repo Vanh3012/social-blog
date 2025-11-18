@@ -1,29 +1,112 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content, script)">
 
 <head>
     <meta charset="UTF-8">
-    <title th:text="${pageTitle} ?: 'Social Blog'">Social Blog</title>
+    <title th:text="${pageTitle} ?: 'Chân Trời'">Chân Trời</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <!-- AlpineJS -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Smooth transitions */
+        .transition-smooth {
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* Card hover effect */
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+    </style>
 </head>
 
-<body class="bg-neutral-100 text-neutral-800">
+<body class="bg-gray-100 min-h-screen">
 
     <!-- NAVBAR -->
-    <header th:replace="~{layout/fragments/_navbar :: navbar}"></header>
+    <header th:replace="~{layout/fragments/_navbar :: navbar}" class="sticky top-0 z-50"></header>
 
     <!-- MAIN CONTENT -->
-    <main class="max-w-3xl mx-auto mt-6 px-4">
-        <th:block th:replace="${content}" />
+    <main class="max-w-[1440px] mx-auto py-4 px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+
+            <!-- Left Sidebar (Desktop only) -->
+            <aside class="hidden lg:block lg:col-span-3">
+                <div class="sticky top-20 space-y-2">
+                    <!-- User quick links would go here -->
+                    <div class="bg-white rounded-lg shadow-sm p-2">
+                        <div class="text-sm font-medium text-gray-700 px-3 py-2">
+                            Menu
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <div class="lg:col-span-6">
+                <th:block th:replace="${content}" />
+            </div>
+
+            <!-- Right Sidebar (Desktop only) -->
+            <aside class="hidden lg:block lg:col-span-3">
+                <div class="sticky top-20 space-y-4">
+                    <!-- Contacts/Suggestions would go here -->
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-3">
+                            Gợi ý kết bạn
+                        </h3>
+                        <div class="text-xs text-gray-500">
+                            Đang cập nhật...
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+        </div>
     </main>
 
     <!-- FOOTER -->
-    <footer th:replace="~{layout/fragments/_footer :: footer}"></footer>
+    <footer th:replace="~{layout/fragments/_footer :: footer}" class="mt-8"></footer>
+
+    <!-- SCRIPT từ file con (ví dụ: home.html) -->
+    <th:block th:replace="${script}" />
 
 </body>
 

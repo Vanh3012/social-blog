@@ -2,87 +2,63 @@ package com.socialblog.controller;
 
 import com.socialblog.dto.CommentRequest;
 import com.socialblog.dto.UserDTO;
+import com.socialblog.model.entity.Comment;
 import com.socialblog.model.entity.Post;
 import com.socialblog.model.entity.User;
+import com.socialblog.repository.CommentRepository;
 import com.socialblog.repository.PostRepository;
 import com.socialblog.repository.UserRepository;
-import com.socialblog.service.CommentService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
-@RequestMapping("/comment")
 @RequiredArgsConstructor
-@Slf4j
 public class CommentController {
 
-    private final CommentService commentService;
-    private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
-    @PostMapping("/add")
-    public String addComment(
-            @ModelAttribute CommentRequest request,
-            HttpSession session,
-            RedirectAttributes redirectAttributes) {
+    @PostMapping("/comment/add")
+    public String addComment(CommentRequest request, HttpSession session) {
 
-        Long postId = request.getPostId();
-
-        try {
-            UserDTO currentUser = (UserDTO) session.getAttribute("currentUser");
-            if (currentUser == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Bạn cần đăng nhập trước.");
-                return "redirect:/auth/login";
-            }
-
-            User user = userRepository.findById(currentUser.getId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
-
-            if (request.getContent() == null || request.getContent().trim().isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Nội dung bình luận không được để trống!");
-                return "redirect:/post/" + postId;
-            }
-
-            commentService.createComment(request, user);
-            redirectAttributes.addFlashAttribute("successMessage", "Bình luận thành công!");
-            return "redirect:/post/" + postId;
-
-        } catch (Exception e) {
-            log.error("Lỗi khi tạo comment: ", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra!");
-            return "redirect:/post/" + postId;
-        }
-    }
-
-    // Xóa comment
-    @PostMapping("/{id}/delete")
-    public String deleteComment(@PathVariable Long id,
-            @RequestParam Long postId,
-            HttpSession session,
-            RedirectAttributes ra) {
-
-        UserDTO currentUser = (UserDTO) session.getAttribute("currentUser");
-        if (currentUser == null) {
-            ra.addFlashAttribute("error", "Bạn cần đăng nhập");
-            return "redirect:/auth/login";
+        UserDTO userDTO = (UserDTO) session.getAttribute("currentUser");
+        if (userDTO == null) {
+            return "redirect:/login";
         }
 
-        try {
-            User user = userRepository.findById(currentUser.getId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+        // 2. Truy vấn User entity thật từ DB
+        User author = userRepository.findById(userDTO.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-            commentService.deleteComment(id, user);
+        // 3. Lấy bài viết
+        Post post = postRepository.findById(request.getPostId())
+                .orElseThrow(() -> new RuntimeException("Post not found"));
 
-            ra.addFlashAttribute("success", "Xóa bình luận thành công");
-        } catch (Exception e) {
-            log.error("Lỗi xóa comment", e);
-            ra.addFlashAttribute("error", e.getMessage());
+        // 4. Tạo comment mới
+        Comment comment = Comment.builder()
+                .author(author)
+                .post(post)
+                .content(request.getContent())
+                .build();
+
+        // 5. Nếu là reply
+        if (request.getParentCommentId() != null) {
+            Comment parent = commentRepository.findById(request.getParentCommentId())
+                    .orElseThrow(() -> new RuntimeException("Parent comment not found"));
+            comment.setParentComment(parent);
         }
 
-        return "redirect:/post/" + postId;
+        // 6. Lưu comment
+        commentRepository.save(comment);
+
+        // 7. Tăng số comment trong post (tuỳ bạn muốn)
+        post.setCommentCount(post.getCommentCount() + 1);
+        postRepository.save(post);
+
+        // 8. Quay lại trang detail
+        return "redirect:/post/" + request.getPostId();
     }
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/userbase :: layout(~{::content})}">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/userbase :: layout(~{::content}, ~{::script})}">
 
 <body>
     <section th:fragment="content" x-data="{ images: [], files: [] }">
@@ -68,6 +68,11 @@
 
         </div>
 
+    </section>
+
+    <!-- ===================== SCRIPTS ===================== -->
+    <section th:fragment="script">
+        <script src="/js/reactions.js"></script>
     </section>
 </body>
 

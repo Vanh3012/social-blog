@@ -18,43 +18,36 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
 
-    public void createComment(CommentRequest request, User user) {
+    // ====================== TẠO COMMENT / REPLY ======================
+    public Comment addComment(CommentRequest request, User author) {
+
         Post post = postRepository.findById(request.getPostId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết"));
 
-        Comment c = Comment.builder()
+        Comment parent = null;
+        if (request.getParentCommentId() != null) {
+            parent = commentRepository.findById(request.getParentCommentId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy comment cha"));
+        }
+
+        Comment comment = Comment.builder()
                 .content(request.getContent())
+                .author(author)
                 .post(post)
-                .author(user)
+                .parentComment(parent)
                 .build();
 
-        commentRepository.save(c);
+        Comment saved = commentRepository.save(comment);
+
+        // cập nhật số comment cho bài viết
+        post.setCommentCount(post.getCommentCount() + 1);
+        postRepository.save(post);
+
+        return saved;
     }
 
-    public void deleteComment(Long id, User user) {
-        Comment c = commentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận"));
-
-        if (!c.getAuthor().getId().equals(user.getId())) {
-            throw new RuntimeException("Bạn không được xóa bình luận này");
-        }
-
-        commentRepository.delete(c);
-    }
-
-    public void updateComment(Long id, String content, User user) {
-        Comment c = commentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận"));
-
-        if (!c.getAuthor().getId().equals(user.getId())) {
-            throw new RuntimeException("Bạn không được sửa bình luận này");
-        }
-
-        c.setContent(content);
-        commentRepository.save(c);
-    }
-
-    public List<Comment> getCommentsByPost(Long postId) {
+    // ====================== LẤY DANH SÁCH COMMENT ======================
+    public List<Comment> getCommentsOfPost(Long postId) {
         return commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
     }
 }

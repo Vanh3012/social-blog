@@ -1,77 +1,710 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/userbase :: layout(~{::content})}">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layout/userbase :: layout(~{::content}, ~{::script})}">
 
 <body>
+
     <section th:fragment="content">
 
-        <article class="max-w-2xl mx-auto bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
+        <article class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200"
+            th:data-post-id="${post.id}" th:data-user-reaction="${userReaction}">
 
-            <!-- HEADER -->
-            <header class="flex items-center gap-3 mb-4">
+            <!-- ========== HEADER ========== -->
+            <header class="flex items-center justify-between p-4">
+                <div class="flex items-center gap-3">
+                    <!-- Avatar -->
+                    <a th:href="@{/profile/{username}(username=${post.author.username})}" class="flex-shrink-0">
+                        <img th:if="${post.author.avatarUrl != null}" th:src="${post.author.avatarUrl}"
+                            class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100">
+                        <div th:if="${post.author.avatarUrl == null}"
+                            class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-base">
+                            <span th:text="${#strings.substring(post.author.username, 0, 1).toUpperCase()}"></span>
+                        </div>
+                    </a>
 
-                <!-- Avatar -->
-                <div class="h-10 w-10 rounded-full overflow-hidden bg-neutral-200">
-                    <img th:if="${post.author.avatarUrl != null}" th:src="${post.author.avatarUrl}"
-                        class="w-full h-full object-cover" />
-
-                    <div th:if="${post.author.avatarUrl == null}" class="w-full h-full bg-neutral-300"></div>
+                    <!-- Tên + Thời gian -->
+                    <div>
+                        <a th:href="@{/profile/{username}(username=${post.author.username})}"
+                            class="font-semibold text-base text-gray-900 hover:underline"
+                            th:text="${post.author.username}">username</a>
+                        <div class="flex items-center gap-1 text-xs text-gray-500">
+                            <span th:text="${#temporals.format(post.createdAt,'dd/MM/yyyy HH:mm')}">time</span>
+                            <span>·</span>
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" />
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Username + time -->
-                <div>
-                    <p class="text-sm font-semibold" th:text="${post.author.username}">username</p>
-                    <p class="text-xs text-neutral-500"
-                        th:text="${#temporals.format(post.createdAt,'dd/MM/yyyy HH:mm')}">
-                    </p>
-                </div>
-
+                <!-- Menu button -->
+                <button class="p-2 hover:bg-gray-100 rounded-full transition">
+                    <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                    </svg>
+                </button>
             </header>
 
-            <!-- CONTENT -->
-            <p class="text-sm mb-3" th:text="${post.content}"></p>
-
-            <!-- IMAGES WITH SMART GRID -->
-            <div th:if="${post.images != null and !#lists.isEmpty(post.images)}"
-                th:switch="${#lists.size(post.images)}">
-
-                <!-- 1 ảnh -->
-                <div th:case="1" class="grid grid-cols-1 gap-2">
-                    <img th:src="${post.images[0].imageUrl}" class="w-full object-cover rounded-xl max-h-[500px]" />
-                </div>
-
-                <!-- 2 ảnh -->
-                <div th:case="2" class="grid grid-cols-2 gap-2">
-                    <div th:each="img : ${post.images}">
-                        <img th:src="@{'/uploads/' + ${img.imageUrl}}" class="w-full h-72 object-cover rounded-xl" />
-                    </div>
-                </div>
-
-                <!-- 3 ảnh (layout Facebook) -->
-                <div th:case="3" class="grid grid-cols-2 grid-rows-2 gap-2">
-                    <div th:each="img, i : ${post.images}">
-                        <img th:src="@{'/uploads/' + ${img.imageUrl}}" th:classappend="${i.index == 0} ? 'row-span-2 h-full' : ''"
-                            class="w-full object-cover rounded-xl h-72" />
-                    </div>
-                </div>
-
-                <!-- 4+ ảnh -->
-                <div th:case="*" class="grid grid-cols-3 gap-2">
-                    <div th:each="img : ${post.images}">
-                        <img th:src="@{'/uploads/' + ${img.imageUrl}}" class="w-full h-60 object-cover rounded-xl" />
-                    </div>
-                </div>
-
+            <!-- ========== CONTENT ========== -->
+            <div class="px-4 pb-3">
+                <p class="text-[15px] text-gray-900 whitespace-pre-wrap leading-relaxed" th:text="${post.content}">Nội
+                    dung bài viết</p>
             </div>
 
-            <!-- Footer -->
-            <footer class="text-xs text-neutral-500 mt-3">
-                <span th:text="${post.likeCount} + ' lượt thích'"></span> ·
-                <span th:text="${post.commentCount} + ' bình luận'"></span>
+            <!-- ========== IMAGES GRID ========== -->
+            <div th:if="${post.images != null and !#lists.isEmpty(post.images)}" class="relative bg-black image-gallery"
+                th:classappend="${#lists.size(post.images) == 1 ? '' : 
+                                 (#lists.size(post.images) == 2 ? 'grid grid-cols-2' :
+                                 (#lists.size(post.images) == 3 ? 'grid grid-cols-2' : 'grid grid-cols-2'))}">
+
+                <!-- 1 ảnh: Full width -->
+                <div th:if="${#lists.size(post.images) == 1}" th:each="img, iter : ${post.images}">
+                    <img th:src="@{'/uploads/' + ${img.imageUrl}}" th:attr="data-index=${iter.index}" alt="Post image"
+                        class="lightbox-trigger w-full max-h-[700px] object-contain mx-auto cursor-pointer hover:opacity-95 transition">
+                </div>
+
+                <!-- 2 ảnh: Grid 2 cột -->
+                <div th:if="${#lists.size(post.images) == 2}" th:each="img, iter : ${post.images}"
+                    class="relative overflow-hidden aspect-square">
+                    <img th:src="@{'/uploads/' + ${img.imageUrl}}" th:attr="data-index=${iter.index}" alt="Post image"
+                        class="lightbox-trigger w-full h-full object-cover cursor-pointer hover:opacity-95 transition">
+                </div>
+
+                <!-- 3 ảnh: 1 lớn + 2 nhỏ -->
+                <div th:if="${#lists.size(post.images) == 3}">
+                    <div th:each="img, iter : ${post.images}" class="relative overflow-hidden"
+                        th:classappend="${iter.index == 0 ? 'row-span-2 aspect-[4/5]' : 'aspect-square'}">
+                        <img th:src="@{'/uploads/' + ${img.imageUrl}}" th:attr="data-index=${iter.index}"
+                            alt="Post image"
+                            class="lightbox-trigger w-full h-full object-cover cursor-pointer hover:opacity-95 transition">
+                    </div>
+                </div>
+
+                <!-- 4+ ảnh: Grid 2x2 -->
+                <div th:if="${#lists.size(post.images) >= 4}">
+                    <div th:each="img, iter : ${post.images}" class="relative overflow-hidden aspect-square"
+                        th:classappend="${iter.index >= 4 ? 'hidden' : ''}">
+                        <img th:src="@{'/uploads/' + ${img.imageUrl}}" th:attr="data-index=${iter.index}"
+                            alt="Post image"
+                            class="lightbox-trigger w-full h-full object-cover cursor-pointer hover:opacity-95 transition">
+
+                        <div th:if="${iter.index == 3 && #lists.size(post.images) > 4}"
+                            class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center cursor-pointer hover:bg-opacity-60 transition lightbox-trigger-overlay"
+                            th:attr="data-index=${iter.index}">
+                            <span class="text-white text-3xl font-semibold pointer-events-none"
+                                th:text="'+' + ${#lists.size(post.images) - 4}">+5</span>
+                        </div>
+                    </div>
+
+                    <!-- Hidden images for lightbox -->
+                    <div th:each="img, iter : ${post.images}" th:if="${iter.index >= 4}" class="hidden">
+                        <img th:src="@{'/uploads/' + ${img.imageUrl}}" th:attr="data-index=${iter.index}"
+                            alt="Post image" class="lightbox-hidden">
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== LIGHTBOX ========== -->
+            <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-95 z-[9999] hidden">
+                <!-- Background overlay (clickable to close) -->
+                <div id="lightbox-backdrop" class="absolute inset-0"></div>
+
+                <!-- Close button -->
+                <button id="lightbox-close"
+                    class="absolute top-4 right-4 w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition z-[10000]">
+                    <svg class="w-6 h-6 text-white pointer-events-none" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <!-- Previous button -->
+                <button id="lightbox-prev"
+                    class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition z-[10000]">
+                    <svg class="w-7 h-7 text-white pointer-events-none" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
+                <!-- Next button -->
+                <button id="lightbox-next"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition z-[10000]">
+                    <svg class="w-7 h-7 text-white pointer-events-none" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+
+                <!-- Image counter -->
+                <div
+                    class="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-gray-800 text-white text-sm z-[10000] pointer-events-none">
+                    <span id="lightbox-counter">1 / 1</span>
+                </div>
+
+                <!-- Main image container -->
+                <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+                    <img id="lightbox-image" src="" alt="Lightbox image" style="transition: opacity 0.15s ease-in-out;"
+                        class="max-w-full max-h-[90vh] object-contain">
+                </div>
+            </div>
+
+            <!-- ========== FOOTER (REACTION / COMMENT / SHARE) ========== -->
+            <footer class="p-3">
+
+                <!-- Reaction + comment count -->
+                <div class="flex items-center justify-between px-2 py-2 text-sm text-gray-600">
+                    <div class="flex items-center gap-1">
+                        <div class="flex -space-x-1">
+                            <div
+                                class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center border-2 border-white">
+                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <span class="like-count" th:text="${post.likeCount}">0</span>
+                    </div>
+
+                    <span th:text="${post.commentCount} + ' bình luận'">0 bình luận</span>
+                </div>
+
+                <!-- Divider -->
+                <div class="border-t border-gray-200 my-1"></div>
+
+                <div class="grid grid-cols-3 gap-1">
+
+                    <!-- LIKE + POPUP -->
+                    <div class="relative">
+                        <button type="button" onclick="toggleLike(this); event.stopPropagation();"
+                            onmouseenter="showReactionPopup(this)" onmouseleave="hideReactionPopup(this)" class="reaction-main-btn w-full py-2 rounded-lg hover:bg-gray-100 
+                                       flex items-center justify-center gap-2 transition-all">
+
+                            <img class="reaction-icon object-contain" src="/reactions/non-reaction.png" alt="Reaction"
+                                style="width: 20px; height: 20px;">
+
+                            <span class="reaction-label text-[15px] font-medium text-gray-600">Thích</span>
+                        </button>
+
+                        <!-- Popup -->
+                        <div class="reaction-popup absolute bottom-full left-1/2 -translate-x-1/2 mb-2
+                                    bg-white border border-gray-200 rounded-full shadow-2xl
+                                    flex items-center z-50" style="display: none; padding: 8px 12px; gap: 4px;"
+                            onmouseenter="keepPopupOpen(this)" onmouseleave="hidePopupNow(this)">
+
+                            <button type="button" onclick="handleReaction(this, 'LIKE'); event.stopPropagation();"
+                                class="hover:scale-125 transition-transform"
+                                style="padding: 4px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <img src="/reactions/like.png" style="width: 40px; height: 40px; object-fit: contain;">
+                            </button>
+
+                            <button type="button" onclick="handleReaction(this, 'LOVE'); event.stopPropagation();"
+                                class="hover:scale-125 transition-transform"
+                                style="padding: 4px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <img src="/reactions/love.png" style="width: 40px; height: 40px; object-fit: contain;">
+                            </button>
+
+                            <button type="button" onclick="handleReaction(this, 'HAHA'); event.stopPropagation();"
+                                class="hover:scale-125 transition-transform"
+                                style="padding: 4px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <img src="/reactions/haha.png" style="width: 40px; height: 40px; object-fit: contain;">
+                            </button>
+
+                            <button type="button" onclick="handleReaction(this, 'WOW'); event.stopPropagation();"
+                                class="hover:scale-125 transition-transform"
+                                style="padding: 4px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <img src="/reactions/wow.png" style="width: 40px; height: 40px; object-fit: contain;">
+                            </button>
+
+                            <button type="button" onclick="handleReaction(this, 'SAD'); event.stopPropagation();"
+                                class="hover:scale-125 transition-transform"
+                                style="padding: 4px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <img src="/reactions/sad.png" style="width: 40px; height: 40px; object-fit: contain;">
+                            </button>
+
+                            <button type="button" onclick="handleReaction(this, 'ANGRY'); event.stopPropagation();"
+                                class="hover:scale-125 transition-transform"
+                                style="padding: 4px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <img src="/reactions/angry.png" style="width: 40px; height: 40px; object-fit: contain;">
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- COMMENT -->
+                    <a href="#comments"
+                        class="py-2 rounded-lg hover:bg-gray-100 flex items-center justify-center gap-2 transition-all">
+                        <svg class="text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            style="width: 20px; height: 20px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        <span class="text-[15px] font-medium text-gray-600">Bình luận</span>
+                    </a>
+
+                    <!-- SHARE -->
+                    <button
+                        class="py-2 rounded-lg hover:bg-gray-100 flex items-center justify-center gap-2 transition-all">
+                        <svg class="text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            style="width: 20px; height: 20px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                        <span class="text-[15px] font-medium text-gray-600">Chia sẻ</span>
+                    </button>
+                </div>
             </footer>
+
+            <!-- ========== COMMENTS SECTION ========== -->
+            <div id="comments" class="border-t border-gray-200 p-4">
+                <h3 class="font-semibold text-base mb-4">Bình luận</h3>
+
+                <!-- Không có comment -->
+                <div th:if="${#lists.isEmpty(post.comments)}" class="text-center py-8 text-gray-500">
+                    <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    <p class="text-sm">Chưa có bình luận nào</p>
+                    <p class="text-xs mt-1">Hãy là người đầu tiên bình luận!</p>
+                </div>
+
+                <!-- COMMENT CHA -->
+                <div th:each="c : ${post.comments}" class="space-y-3">
+                    <div th:if="${c.parentComment == null}">
+
+                        <div class="flex items-start gap-2">
+                            <!-- Avatar -->
+                            <a th:href="@{/profile/{username}(username=${c.author.username})}" class="flex-shrink-0">
+                                <img th:if="${c.author.avatarUrl != null}" th:src="${c.author.avatarUrl}"
+                                    class="w-8 h-8 rounded-full object-cover">
+                                <div th:if="${c.author.avatarUrl == null}"
+                                    class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-semibold text-xs">
+                                    <span th:text="${#strings.substring(c.author.username, 0, 1).toUpperCase()}"></span>
+                                </div>
+                            </a>
+
+                            <div class="flex-1">
+                                <!-- Nội dung comment -->
+                                <div class="bg-gray-100 px-3 py-2 rounded-2xl inline-block">
+                                    <a th:href="@{/profile/{username}(username=${c.author.username})}"
+                                        class="font-semibold text-sm text-gray-900 hover:underline"
+                                        th:text="${c.author.username}">username</a>
+                                    <p class="text-[15px] text-gray-800 mt-0.5" th:text="${c.content}">content</p>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="flex items-center gap-3 mt-1 ml-3 text-xs text-gray-600">
+                                    <button class="font-semibold hover:underline">Thích</button>
+                                    <button class="font-semibold hover:underline"
+                                        th:onclick="'showReplyForm(' + ${c.id} + ')'">
+                                        Trả lời
+                                    </button>
+                                    <span class="text-gray-500"
+                                        th:text="${#temporals.format(c.createdAt, 'HH:mm dd/MM/yyyy')}">time</span>
+                                </div>
+
+                                <!-- FORM TRẢ LỜI -->
+                                <form th:action="@{/comment/add}" method="post"
+                                    class="hidden mt-3 flex gap-2 reply-form" th:id="'reply-form-' + ${c.id}">
+
+                                    <input type="hidden" name="postId" th:value="${post.id}">
+                                    <input type="hidden" name="parentCommentId" th:value="${c.id}">
+
+                                    <img th:if="${session.currentUser.avatarUrl != null}"
+                                        th:src="${session.currentUser.avatarUrl}"
+                                        class="w-7 h-7 rounded-full object-cover flex-shrink-0">
+                                    <div th:if="${session.currentUser.avatarUrl == null}"
+                                        class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+                                        <span
+                                            th:text="${#strings.substring(session.currentUser.username, 0, 1).toUpperCase()}"></span>
+                                    </div>
+
+                                    <div class="flex-1 flex gap-2">
+                                        <input name="content" placeholder="Viết phản hồi..." required
+                                            class="flex-1 px-3 py-2 bg-gray-100 border-0 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                                        <button type="submit"
+                                            class="px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition">
+                                            Gửi
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <!-- DANH SÁCH TRẢ LỜI -->
+                                <div th:if="${!#lists.isEmpty(c.replies)}" class="mt-3 space-y-3">
+                                    <div th:each="r : ${c.replies}" class="flex items-start gap-2">
+
+                                        <a th:href="@{/profile/{username}(username=${r.author.username})}"
+                                            class="flex-shrink-0">
+                                            <img th:if="${r.author.avatarUrl != null}" th:src="${r.author.avatarUrl}"
+                                                class="w-7 h-7 rounded-full object-cover">
+                                            <div th:if="${r.author.avatarUrl == null}"
+                                                class="w-7 h-7 rounded-full bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center text-white font-semibold text-xs">
+                                                <span
+                                                    th:text="${#strings.substring(r.author.username, 0, 1).toUpperCase()}"></span>
+                                            </div>
+                                        </a>
+
+                                        <div class="flex-1">
+                                            <div class="bg-gray-100 px-3 py-2 rounded-2xl inline-block">
+                                                <a th:href="@{/profile/{username}(username=${r.author.username})}"
+                                                    class="font-semibold text-sm text-gray-900 hover:underline"
+                                                    th:text="${r.author.username}">username</a>
+                                                <p class="text-[15px] text-gray-800 mt-0.5" th:text="${r.content}">reply
+                                                    content</p>
+                                            </div>
+
+                                            <div class="flex items-center gap-3 mt-1 ml-3 text-xs text-gray-600">
+                                                <button class="font-semibold hover:underline">Thích</button>
+                                                <span class="text-gray-500"
+                                                    th:text="${#temporals.format(r.createdAt, 'HH:mm dd/MM/yyyy')}">time</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ========== COMMENT INPUT (comment cha) ========== -->
+            <div class="border-t border-gray-200 p-4">
+                <form th:if="${session.currentUser != null}" th:action="@{/comment/add}" method="post"
+                    class="flex gap-2">
+
+                    <input type="hidden" name="postId" th:value="${post.id}">
+
+                    <img th:if="${session.currentUser.avatarUrl != null}" th:src="${session.currentUser.avatarUrl}"
+                        class="w-8 h-8 rounded-full object-cover flex-shrink-0">
+                    <div th:if="${session.currentUser.avatarUrl == null}"
+                        class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                        <span th:text="${#strings.substring(session.currentUser.username, 0, 1).toUpperCase()}"></span>
+                    </div>
+
+                    <div class="flex-1 flex gap-2">
+                        <input name="content" placeholder="Viết bình luận..." required
+                            class="flex-1 px-4 py-2 bg-gray-100 border-0 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                        <button type="submit"
+                            class="px-5 py-2 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition">
+                            Gửi
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Nếu chưa login -->
+                <div th:if="${session.currentUser == null}" class="text-center py-4 text-gray-600">
+                    <a th:href="@{/login}" class="text-blue-600 font-semibold hover:underline">Đăng nhập</a>
+                    để bình luận
+                </div>
+            </div>
 
         </article>
 
     </section>
+
+    <!-- ====================== SCRIPT ====================== -->
+    <section th:fragment="script">
+        <script>
+            let hideTimeout = null;
+
+            function showReactionPopup(button) {
+                clearTimeout(hideTimeout);
+                const popup = button.nextElementSibling;
+                if (!popup) return;
+                popup.style.display = 'flex';
+            }
+
+            function hideReactionPopup(button) {
+                hideTimeout = setTimeout(() => {
+                    const popup = button.nextElementSibling;
+                    if (popup) popup.style.display = 'none';
+                }, 300);
+            }
+
+            function keepPopupOpen(popup) {
+                clearTimeout(hideTimeout);
+            }
+
+            function hidePopupNow(popup) {
+                hideTimeout = setTimeout(() => {
+                    popup.style.display = 'none';
+                }, 300);
+            }
+
+            function toggleLike(button) {
+                const postDiv = button.closest('[data-post-id]');
+                const currentReaction = postDiv.dataset.userReaction || null;
+
+                if (currentReaction === 'LIKE') {
+                    removeReaction(postDiv);
+                } else {
+                    handleReaction(button, 'LIKE');
+                }
+            }
+
+            function handleReaction(button, reactionType) {
+                const postDiv = button.closest('[data-post-id]');
+                const postId = postDiv.dataset.postId;
+                const currentReaction = postDiv.dataset.userReaction || null;
+
+                if (currentReaction === reactionType) {
+                    removeReaction(postDiv);
+                } else {
+                    addReaction(postDiv, postId, reactionType);
+                }
+            }
+
+            function addReaction(postDiv, postId, reactionType) {
+                fetch('/reaction/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ postId: postId, type: reactionType })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateUI(postDiv, reactionType, data.totalReactions);
+                        } else {
+                            alert(data.message || 'Có lỗi xảy ra!');
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Bạn cần đăng nhập để thực hiện hành động này!');
+                    });
+            }
+
+            function removeReaction(postDiv) {
+                const postId = postDiv.dataset.postId;
+                fetch('/reaction/remove/' + postId, {
+                    method: 'DELETE'
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateUI(postDiv, null, data.totalReactions);
+                        } else {
+                            alert(data.message || 'Có lỗi xảy ra!');
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Có lỗi xảy ra!');
+                    });
+            }
+
+            function updateUI(postDiv, newReaction, totalReactions) {
+                postDiv.dataset.userReaction = newReaction || '';
+
+                const likeSpan = postDiv.querySelector('.like-count');
+                if (likeSpan) {
+                    likeSpan.textContent = totalReactions;
+                }
+
+                const mainBtn = postDiv.querySelector('.reaction-main-btn');
+                const icon = postDiv.querySelector('.reaction-icon');
+                const label = postDiv.querySelector('.reaction-label');
+
+                const map = {
+                    LIKE: { icon: '/reactions/like.png', label: 'Thích', color: 'text-blue-600' },
+                    LOVE: { icon: '/reactions/love.png', label: 'Yêu thích', color: 'text-red-600' },
+                    HAHA: { icon: '/reactions/haha.png', label: 'Haha', color: 'text-yellow-600' },
+                    WOW: { icon: '/reactions/wow.png', label: 'Wow', color: 'text-yellow-600' },
+                    SAD: { icon: '/reactions/sad.png', label: 'Buồn', color: 'text-yellow-600' },
+                    ANGRY: { icon: '/reactions/angry.png', label: 'Phẫn nộ', color: 'text-orange-600' }
+                };
+
+                if (newReaction && map[newReaction]) {
+                    icon.src = map[newReaction].icon;
+                    label.textContent = map[newReaction].label;
+                    label.className = `reaction-label text-[15px] font-semibold ${map[newReaction].color}`;
+                } else {
+                    icon.src = '/reactions/non-reaction.png';
+                    label.textContent = 'Thích';
+                    label.className = 'reaction-label text-[15px] font-medium text-gray-600';
+                }
+
+                const popup = postDiv.querySelector('.reaction-popup');
+                if (popup) {
+                    popup.style.display = 'none';
+                }
+            }
+
+            function showReplyForm(id) {
+                document.querySelectorAll('.reply-form').forEach(f => f.classList.add('hidden'));
+                document.getElementById('reply-form-' + id).classList.remove('hidden');
+            }
+
+            // ========== LIGHTBOX FUNCTIONS ==========
+            let currentImageIndex = 0;
+            let allImages = [];
+
+            function initLightbox() {
+                console.log('Initializing lightbox...');
+
+                // Lấy tất cả ảnh có class lightbox-trigger
+                const imageTriggers = document.querySelectorAll('.lightbox-trigger');
+                const overlayTriggers = document.querySelectorAll('.lightbox-trigger-overlay');
+                const hiddenImages = document.querySelectorAll('.lightbox-hidden');
+
+                console.log('Found images:', imageTriggers.length);
+                console.log('Found overlays:', overlayTriggers.length);
+                console.log('Found hidden:', hiddenImages.length);
+
+                // Collect all images
+                allImages = [];
+                imageTriggers.forEach(img => {
+                    allImages.push(img.src);
+                });
+                hiddenImages.forEach(img => {
+                    allImages.push(img.src);
+                });
+
+                console.log('Total images:', allImages.length);
+
+                // Add click event to all image triggers
+                imageTriggers.forEach(img => {
+                    img.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const index = parseInt(this.getAttribute('data-index'));
+                        console.log('Image clicked, index:', index);
+                        openLightbox(index);
+                    });
+                });
+
+                // Add click event to overlay triggers
+                overlayTriggers.forEach(overlay => {
+                    overlay.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const index = parseInt(this.getAttribute('data-index'));
+                        console.log('Overlay clicked, index:', index);
+                        openLightbox(index);
+                    });
+                });
+            }
+
+            function openLightbox(index) {
+                console.log('Opening lightbox at index:', index);
+
+                const lightbox = document.getElementById('lightbox');
+                const lightboxImage = document.getElementById('lightbox-image');
+                const counter = document.getElementById('lightbox-counter');
+
+                if (!lightbox || !lightboxImage || !counter) {
+                    console.error('Lightbox elements not found!');
+                    return;
+                }
+
+                currentImageIndex = index;
+
+                // Hiển thị lightbox
+                lightbox.classList.remove('hidden');
+                lightbox.classList.add('flex');
+                lightboxImage.src = allImages[currentImageIndex];
+                counter.textContent = `${currentImageIndex + 1} / ${allImages.length}`;
+
+                console.log('Lightbox opened, showing image:', allImages[currentImageIndex]);
+
+                // Prevent body scroll
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeLightbox() {
+                const lightbox = document.getElementById('lightbox');
+                lightbox.classList.add('hidden');
+                lightbox.classList.remove('flex');
+                document.body.style.overflow = 'auto';
+            }
+
+            function nextImage() {
+                if (currentImageIndex < allImages.length - 1) {
+                    currentImageIndex++;
+                } else {
+                    currentImageIndex = 0;
+                }
+                updateLightboxImage();
+            }
+
+            function previousImage() {
+                if (currentImageIndex > 0) {
+                    currentImageIndex--;
+                } else {
+                    currentImageIndex = allImages.length - 1;
+                }
+                updateLightboxImage();
+            }
+
+            function updateLightboxImage() {
+                const lightboxImage = document.getElementById('lightbox-image');
+                const counter = document.getElementById('lightbox-counter');
+
+                lightboxImage.style.opacity = '0';
+
+                setTimeout(() => {
+                    lightboxImage.src = allImages[currentImageIndex];
+                    counter.textContent = `${currentImageIndex + 1} / ${allImages.length}`;
+                    lightboxImage.style.opacity = '1';
+                }, 150);
+            }
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                const lightbox = document.getElementById('lightbox');
+                if (lightbox && !lightbox.classList.contains('hidden')) {
+                    if (e.key === 'Escape') {
+                        closeLightbox();
+                    } else if (e.key === 'ArrowRight') {
+                        nextImage();
+                    } else if (e.key === 'ArrowLeft') {
+                        previousImage();
+                    }
+                }
+            });
+
+            document.addEventListener('DOMContentLoaded', () => {
+                // Initialize lightbox
+                initLightbox();
+
+                // Add button event listeners
+                document.getElementById('lightbox-close')?.addEventListener('click', closeLightbox);
+                document.getElementById('lightbox-prev')?.addEventListener('click', previousImage);
+                document.getElementById('lightbox-next')?.addEventListener('click', nextImage);
+
+                // Click outside to close lightbox
+                const lightbox = document.getElementById('lightbox');
+                if (lightbox) {
+                    lightbox.addEventListener('click', (e) => {
+                        if (e.target.id === 'lightbox') {
+                            closeLightbox();
+                        }
+                    });
+                }
+
+                // Initialize reactions
+                const posts = document.querySelectorAll('[data-post-id]');
+                posts.forEach(postDiv => {
+                    const reaction = postDiv.dataset.userReaction || null;
+                    const likeText = postDiv.querySelector('.like-count')?.textContent || '0';
+                    if (reaction) {
+                        updateUI(postDiv, reaction, parseInt(likeText) || 0);
+                    }
+                });
+            });
+        </script>
+    </section>
+
 </body>
 
 </html>

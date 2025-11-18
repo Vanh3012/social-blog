@@ -1,117 +1,397 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/userbase :: layout(~{::content})}">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/userbase :: layout(
+          content = ~{::content},
+          script  = ~{::script}
+      )}">
 
-<body>
-    <section th:fragment="content">
+<!-- ====================== CONTENT ====================== -->
+<section th:fragment="content">
 
-        <div class="max-w-2xl mx-auto space-y-6">
+    <div class="max-w-2xl mx-auto space-y-4">
 
-            <div th:each="post : ${posts}" class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
+        <!-- NÚT TẠO BÀI MỚI -->
+        <div th:if="${currentUser != null}" class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <a th:href="@{/post/create}"
+                class="flex items-center gap-3 px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-full transition cursor-pointer group">
 
-                <!-- ================= HEADER ================= -->
-                <header class="flex items-center gap-3 mb-4">
+                <!-- Avatar -->
+                <img th:if="${currentUser.avatarUrl != null}" th:src="${currentUser.avatarUrl}"
+                    class="w-10 h-10 rounded-full object-cover">
+                <div th:if="${currentUser.avatarUrl == null}"
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                    <span th:text="${#strings.substring(currentUser.username, 0, 1).toUpperCase()}"></span>
+                </div>
 
+                <!-- Text placeholder -->
+                <span class="flex-1 text-gray-500 text-base">
+                    <span th:text="${currentUser.fullName}"></span>, bạn đang nghĩ gì?
+                </span>
+            </a>
+        </div>
+
+        <!-- KHÔNG CÓ BÀI VIẾT -->
+        <div th:if="${posts == null or #lists.isEmpty(posts)}"
+            class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+            <svg class="w-20 h-20 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+            </svg>
+            <p class="text-lg text-gray-500">Chưa có bài viết nào</p>
+            <p class="text-sm text-gray-400 mt-2">Hãy là người đầu tiên chia sẻ điều gì đó!</p>
+        </div>
+
+        <!-- DANH SÁCH BÀI VIẾT -->
+        <article th:each="post : ${posts}"
+            class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+            th:attr="data-post-id=${post.id},data-user-reaction=${userReactions.get(post.id)}">
+
+            <!-- ============ HEADER ============ -->
+            <header class="flex items-center justify-between p-4">
+                <div class="flex items-center gap-3">
                     <!-- Avatar -->
-                    <div>
+                    <a th:href="@{/profile/{username}(username=${post.author.username})}" class="flex-shrink-0">
                         <img th:if="${post.author.avatarUrl != null}" th:src="${post.author.avatarUrl}"
-                            class="w-10 h-10 rounded-full object-cover">
-
-                        <div th:if="${post.author.avatarUrl == null}" class="w-10 h-10 rounded-full bg-neutral-300">
+                            class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100">
+                        <div th:if="${post.author.avatarUrl == null}"
+                            class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-base">
+                            <span th:text="${#strings.substring(post.author.username, 0, 1).toUpperCase()}"></span>
                         </div>
-                    </div>
+                    </a>
 
-                    <!-- Tên + thời gian -->
+                    <!-- Tên + Thời gian -->
                     <div>
-                        <p class="font-semibold text-sm" th:text="${post.author.username}"></p>
-                        <p class="text-xs text-neutral-500"
-                            th:text="${#temporals.format(post.createdAt,'dd/MM/yyyy HH:mm')}"></p>
-                    </div>
-
-                </header>
-
-                <!-- ================= CONTENT ================= -->
-                <p class="text-sm mb-3" th:text="${post.content}"></p>
-
-                <!-- Hình Ảnh -->
-                <div th:if="${post.images != null and !#lists.isEmpty(post.images)}" class="grid gap-2" th:classappend="${#lists.size(post.images) == 1 ? 'grid-cols-1' :
-                                  (#lists.size(post.images) == 2 ? 'grid-cols-2' :
-                                  (#lists.size(post.images) == 3 ? 'grid-cols-2 grid-rows-2' :
-                                  'grid-cols-3'))}">
-                    <div th:each="img : ${post.images}">
-                        <img th:src="@{'/uploads/' + ${img.imageUrl}}" class="rounded-xl w-full object-cover max-h-80">
+                        <a th:href="@{/profile/{username}(username=${post.author.username})}"
+                            class="font-semibold text-base text-gray-900 hover:underline"
+                            th:text="${post.author.username}">username</a>
+                        <div class="flex items-center gap-1 text-xs text-gray-500">
+                            <span th:text="${#temporals.format(post.createdAt,'dd/MM/yyyy')}">time</span>
+                            <span>·</span>
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
 
-                <!-- ================= FOOTER ================= -->
-                <footer class="mt-3 pt-3 border-t text-sm text-neutral-600">
-                
-                    <div class="flex items-center justify-between">
-                
-                        <!-- LIKE + REACTIONS -->
-                        <div class="relative" x-data="{ open: false }">
-                
-                            <!-- Nút Like -->
-                            <button @mouseenter="open = true" @mouseleave="open = false"
-                                class="px-3 py-1 rounded-lg hover:bg-neutral-100 flex items-center gap-1">
-                
-                                <img src="/reactions/like.png" class="w-5 h-5 object-contain">
-                                <span>Thích</span>
-                            </button>
-                
-                            <!-- Popup Reaction -->
-                            <div x-show="open" @mouseenter="open = true" @mouseleave="open = false" x-transition class="absolute bottom-full left-0 mb-2 bg-white border rounded-full px-3 py-2 shadow-lg 
-                                        flex items-center gap-3 z-50 h-14">
-                            
-                                <template x-for="(r, index) in [
-                                    {type:'LIKE',  src:'/reactions/like.png'},
-                                    {type:'LOVE',  src:'/reactions/love.png'},
-                                    {type:'HAHA',  src:'/reactions/haha.png'},
-                                    {type:'WOW',   src:'/reactions/wow.png'},
-                                    {type:'SAD',   src:'/reactions/sad.png'},
-                                    {type:'ANGRY', src:'/reactions/angry.png'}
-                                ]" :key="index">
-                            
-                                    <button @click="sendReaction(r.type, [[${post.id}]])"
-                                        class="hover:scale-125 transition duration-150 flex items-center justify-center">
-                            
-                                        <!-- FIX QUAN TRỌNG: ép width + height cố định -->
-                                        <img :src="r.src" class="w-10 h-10 shrink-0 object-contain rounded-full bg-white">
-                                    </button>
-                            
-                                </template>
-                            </div>
+                <!-- Menu button -->
+                <button class="p-2 hover:bg-gray-100 rounded-full transition">
+                    <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                    </svg>
+                </button>
+            </header>
 
-                
-                        </div>
-                
-                        <!-- Xem chi tiết -->
-                        <a th:href="@{/post/{id}(id=${post.id})}" class="text-blue-600 hover:underline">
-                            Xem chi tiết →
-                        </a>
-                    </div>
-                
-                    <!-- Like & Comment Count -->
-                    <div class="mt-1 text-xs text-neutral-500">
-                        <span th:text="${post.likeCount} + ' lượt thích'"></span> ·
-                        <span th:text="${post.commentCount} + ' bình luận'"></span>
-                    </div>
-                
-                </footer>
-
+            <!-- ============ NỘI DUNG ============ -->
+            <div class="px-4 pb-3">
+                <p class="text-[15px] text-gray-900 whitespace-pre-wrap leading-relaxed" th:text="${post.content}">Nội
+                    dung bài viết</p>
             </div>
 
-        </div>
+            <!-- ============ HÌNH ẢNH ============ -->
+            <div th:if="${post.images != null and !#lists.isEmpty(post.images)}" class="relative bg-black"
+                th:classappend="${#lists.size(post.images) == 1 ? '' : 
+                                 (#lists.size(post.images) == 2 ? 'grid grid-cols-2' :
+                                 (#lists.size(post.images) == 3 ? 'grid grid-cols-2' : 'grid grid-cols-2'))}">
 
-    </section>
+                <!-- 1 ảnh: Full width -->
+                <div th:if="${#lists.size(post.images) == 1}" th:each="img : ${post.images}">
+                    <img th:src="@{'/uploads/' + ${img.imageUrl}}" alt="Post image"
+                        class="w-full max-h-[600px] object-contain mx-auto">
+                </div>
 
-    <!-- Reaction script -->
+                <!-- 2 ảnh: Grid 2 cột -->
+                <div th:if="${#lists.size(post.images) == 2}" th:each="img : ${post.images}"
+                    class="relative overflow-hidden aspect-square">
+                    <img th:src="@{'/uploads/' + ${img.imageUrl}}" alt="Post image" class="w-full h-full object-cover">
+                </div>
+
+                <!-- 3 ảnh: 1 lớn + 2 nhỏ -->
+                <div th:if="${#lists.size(post.images) == 3}">
+                    <div th:each="img, iter : ${post.images}" class="relative overflow-hidden"
+                        th:classappend="${iter.index == 0 ? 'row-span-2 aspect-[4/5]' : 'aspect-square'}">
+                        <img th:src="@{'/uploads/' + ${img.imageUrl}}" alt="Post image"
+                            class="w-full h-full object-cover">
+                    </div>
+                </div>
+
+                <!-- 4+ ảnh: Grid 2x2 -->
+                <div th:if="${#lists.size(post.images) >= 4}">
+                    <div th:each="img, iter : ${post.images}" th:if="${iter.index < 4}"
+                        class="relative overflow-hidden aspect-square">
+                        <img th:src="@{'/uploads/' + ${img.imageUrl}}" alt="Post image"
+                            class="w-full h-full object-cover">
+
+                        <!-- Overlay nếu có nhiều hơn 4 ảnh -->
+                        <div th:if="${iter.index == 3 && #lists.size(post.images) > 4}"
+                            class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center">
+                            <span class="text-white text-3xl font-semibold"
+                                th:text="'+' + ${#lists.size(post.images) - 4}">+5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ FOOTER ============ -->
+            <footer class="p-3">
+
+                <!-- Reaction + Comment Count -->
+                <div class="flex items-center justify-between px-2 py-2 text-sm text-gray-600">
+                    <div class="flex items-center gap-1">
+                        <div class="flex -space-x-1">
+                            <div
+                                class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center border-2 border-white">
+                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <span class="like-count" th:text="${post.likeCount}">0</span>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <span th:text="${post.commentCount} + ' bình luận'">0 bình luận</span>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="border-t border-gray-200 my-1"></div>
+
+                <!-- 3 Action Buttons -->
+                <div class="grid grid-cols-3 gap-1">
+
+                    <!-- ======================= LIKE BUTTON ======================= -->
+                    <div class="relative">
+
+                        <button type="button" onclick="toggleLike(this); event.stopPropagation();"
+                            onmouseenter="showReactionPopup(this)" onmouseleave="hideReactionPopup(this)" class="reaction-main-btn w-full py-2 rounded-lg hover:bg-gray-100 
+                                       flex items-center justify-center gap-2 transition-all">
+
+                            <img class="reaction-icon object-contain" src="/reactions/non-reaction.png" alt="Reaction"
+                                style="width: 20px; height: 20px;">
+
+                            <span class="reaction-label text-[15px] font-medium text-gray-600">Thích</span>
+                        </button>
+
+                        <!-- Popup -->
+                        <div class="reaction-popup absolute bottom-full left-1/2 -translate-x-1/2 mb-2
+                                    bg-white border border-gray-200 rounded-full shadow-2xl
+                                    flex items-center z-50" style="display: none; padding: 8px 12px; gap: 4px;"
+                            onmouseenter="keepPopupOpen(this)" onmouseleave="hidePopupNow(this)">
+
+                            <button type="button" onclick="handleReaction(this, 'LIKE'); event.stopPropagation();"
+                                class="hover:scale-125 transition-transform"
+                                style="padding: 4px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <img src="/reactions/like.png" style="width: 40px; height: 40px; object-fit: contain;">
+                            </button>
+
+                            <button type="button" onclick="handleReaction(this, 'LOVE'); event.stopPropagation();"
+                                class="hover:scale-125 transition-transform"
+                                style="padding: 4px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <img src="/reactions/love.png" style="width: 40px; height: 40px; object-fit: contain;">
+                            </button>
+
+                            <button type="button" onclick="handleReaction(this, 'HAHA'); event.stopPropagation();"
+                                class="hover:scale-125 transition-transform"
+                                style="padding: 4px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <img src="/reactions/haha.png" style="width: 40px; height: 40px; object-fit: contain;">
+                            </button>
+
+                            <button type="button" onclick="handleReaction(this, 'WOW'); event.stopPropagation();"
+                                class="hover:scale-125 transition-transform"
+                                style="padding: 4px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <img src="/reactions/wow.png" style="width: 40px; height: 40px; object-fit: contain;">
+                            </button>
+
+                            <button type="button" onclick="handleReaction(this, 'SAD'); event.stopPropagation();"
+                                class="hover:scale-125 transition-transform"
+                                style="padding: 4px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <img src="/reactions/sad.png" style="width: 40px; height: 40px; object-fit: contain;">
+                            </button>
+
+                            <button type="button" onclick="handleReaction(this, 'ANGRY'); event.stopPropagation();"
+                                class="hover:scale-125 transition-transform"
+                                style="padding: 4px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <img src="/reactions/angry.png" style="width: 40px; height: 40px; object-fit: contain;">
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <!-- ======================= COMMENT BUTTON ======================= -->
+                    <a th:href="@{/post/{id}(id=${post.id})}" class="py-2 rounded-lg hover:bg-gray-100 
+                              flex items-center justify-center gap-2 transition-all">
+
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+
+                        <span class="text-[15px] font-medium text-gray-600">Bình luận</span>
+                    </a>
+
+                    <!-- ======================= SHARE BUTTON ======================= -->
+                    <button class="py-2 rounded-lg hover:bg-gray-100 
+                                   flex items-center justify-center gap-2 transition-all">
+
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+
+                        <span class="text-[15px] font-medium text-gray-600">Chia sẻ</span>
+                    </button>
+
+                </div>
+            </footer>
+
+        </article>
+
+    </div>
+
+</section>
+
+<!-- ====================== SCRIPT ====================== -->
+<section th:fragment="script">
     <script>
-        function sendReaction(type, postId) {
-            console.log("Reaction:", type, "Post:", postId);
-            // TODO: gọi API ở đây
-        }
-    </script>
+        let hideTimeout = null;
 
-</body>
+        function showReactionPopup(button) {
+            clearTimeout(hideTimeout);
+            const popup = button.nextElementSibling;
+            if (!popup) return;
+            popup.style.display = 'flex';
+        }
+
+        function hideReactionPopup(button) {
+            hideTimeout = setTimeout(() => {
+                const popup = button.nextElementSibling;
+                if (popup) popup.style.display = 'none';
+            }, 300);
+        }
+
+        function keepPopupOpen(popup) {
+            clearTimeout(hideTimeout);
+        }
+
+        function hidePopupNow(popup) {
+            hideTimeout = setTimeout(() => {
+                popup.style.display = 'none';
+            }, 300);
+        }
+
+        function toggleLike(button) {
+            const postDiv = button.closest('[data-post-id]');
+            const currentReaction = postDiv.dataset.userReaction || null;
+
+            if (currentReaction === 'LIKE') {
+                removeReaction(postDiv);
+            } else {
+                handleReaction(button, 'LIKE');
+            }
+        }
+
+        function handleReaction(button, reactionType) {
+            const postDiv = button.closest('[data-post-id]');
+            const postId = postDiv.dataset.postId;
+            const currentReaction = postDiv.dataset.userReaction || null;
+
+            if (currentReaction === reactionType) {
+                removeReaction(postDiv);
+            } else {
+                addReaction(postDiv, postId, reactionType);
+            }
+        }
+
+        function addReaction(postDiv, postId, reactionType) {
+            fetch('/reaction/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ postId: postId, type: reactionType })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        updateUI(postDiv, reactionType, data.totalReactions);
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra!');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Bạn cần đăng nhập để thực hiện hành động này!');
+                });
+        }
+
+        function removeReaction(postDiv) {
+            const postId = postDiv.dataset.postId;
+            fetch('/reaction/remove/' + postId, {
+                method: 'DELETE'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        updateUI(postDiv, null, data.totalReactions);
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra!');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Có lỗi xảy ra!');
+                });
+        }
+
+        function updateUI(postDiv, newReaction, totalReactions) {
+            postDiv.dataset.userReaction = newReaction || '';
+
+            const likeSpan = postDiv.querySelector('.like-count');
+            if (likeSpan) {
+                likeSpan.textContent = totalReactions;
+            }
+
+            const mainBtn = postDiv.querySelector('.reaction-main-btn');
+            const icon = postDiv.querySelector('.reaction-icon');
+            const label = postDiv.querySelector('.reaction-label');
+
+            const map = {
+                LIKE: { icon: '/reactions/like.png', label: 'Thích', color: 'text-blue-600' },
+                LOVE: { icon: '/reactions/love.png', label: 'Yêu thích', color: 'text-red-600' },
+                HAHA: { icon: '/reactions/haha.png', label: 'Haha', color: 'text-yellow-600' },
+                WOW: { icon: '/reactions/wow.png', label: 'Wow', color: 'text-yellow-600' },
+                SAD: { icon: '/reactions/sad.png', label: 'Buồn', color: 'text-yellow-600' },
+                ANGRY: { icon: '/reactions/angry.png', label: 'Phẫn nộ', color: 'text-orange-600' }
+            };
+
+            if (newReaction && map[newReaction]) {
+                icon.src = map[newReaction].icon;
+                label.textContent = map[newReaction].label;
+                label.className = `reaction-label text-[15px] font-semibold ${map[newReaction].color}`;
+            } else {
+                icon.src = '/reactions/non-reaction.png';
+                label.textContent = 'Thích';
+                label.className = 'reaction-label text-[15px] font-medium text-gray-600';
+            }
+
+            const popup = postDiv.querySelector('.reaction-popup');
+            if (popup) {
+                popup.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const posts = document.querySelectorAll('[data-post-id]');
+            posts.forEach(postDiv => {
+                const reaction = postDiv.dataset.userReaction || null;
+                const likeText = postDiv.querySelector('.like-count')?.textContent || '0';
+                if (reaction) {
+                    updateUI(postDiv, reaction, parseInt(likeText) || 0);
+                }
+            });
+        });
+    </script>
+</section>
 
 </html>

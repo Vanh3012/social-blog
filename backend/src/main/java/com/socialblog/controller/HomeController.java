@@ -9,6 +9,7 @@ import com.socialblog.repository.UserRepository;
 import com.socialblog.service.PostService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class HomeController {
 
     private final PostService postService;
@@ -34,6 +36,7 @@ public class HomeController {
         Map<Long, String> userReactions = new HashMap<>();
 
         if (currentUserDTO != null) {
+
             // User đã đăng nhập
             User currentUser = userRepository.findById(currentUserDTO.getId()).orElse(null);
 
@@ -43,13 +46,17 @@ public class HomeController {
             if (currentUser != null) {
                 for (Post post : posts) {
                     reactionRepository.findByPostAndUser(post, currentUser)
-                            .ifPresent(reaction -> userReactions.put(post.getId(), reaction.getType().name()));
+                            .ifPresent(reaction -> {
+                                userReactions.put(post.getId(), reaction.getType().name());
+
+                            });
                 }
             }
 
         } else {
             // Khách (chưa đăng nhập) → chỉ xem public posts
             posts = postService.getPublicPosts();
+
         }
 
         model.addAttribute("posts", posts);
