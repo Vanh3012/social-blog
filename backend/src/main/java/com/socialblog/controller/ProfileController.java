@@ -57,6 +57,7 @@ public class ProfileController {
         List<Post> posts;
         List<Friendship> pendingRequests = List.of();
         List<User> friendSuggestions = List.of();
+        List<User> friends = List.of();
         String friendshipStatus = FriendshipStatus.NONE.name();
         Long friendshipId = null;
         boolean isRequestSender = false;
@@ -102,6 +103,7 @@ public class ProfileController {
                 friendSuggestions = friendshipService.suggestFriends(currentUserDTO.getId(), 5);
             }
         }
+        friends = friendshipService.listFriends(profileUser.getId());
         model.addAttribute("userReactions", userReactions);
         model.addAttribute("profileUser", profileUser);
         model.addAttribute("posts", posts);
@@ -112,6 +114,7 @@ public class ProfileController {
         model.addAttribute("isRequestSender", isRequestSender);
         model.addAttribute("pendingFriendRequests", pendingRequests);
         model.addAttribute("friendSuggestions", friendSuggestions);
+        model.addAttribute("friends", friends);
 
         return "User/profile";
     }

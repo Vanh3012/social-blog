@@ -121,7 +121,16 @@ public class FriendshipService {
         return friendshipRepository.findByReceiverAndStatus(receiver, FriendshipStatus.PENDING);
     }
 
-    public List<User> suggestFriends(Long userId, int limit) {
+    
+    public List<User> listFriends(Long userId) {
+        List<Friendship> accepted = friendshipRepository.findAcceptedFriends(userId);
+        return accepted.stream()
+                .map(f -> f.getSender().getId().equals(userId) ? f.getReceiver() : f.getSender())
+                .distinct()
+                .toList();
+    }
+
+public List<User> suggestFriends(Long userId, int limit) {
         User me = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
 

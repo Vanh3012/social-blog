@@ -237,6 +237,25 @@
                         
                     </div>
 
+                    <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="font-bold text-xl">Bạn bè</h2>
+                            <span class="text-sm text-gray-500" th:text="${#lists.size(friends)} + ' bạn'">0 bạn</span>
+                        </div>
+                        <div th:if="${#lists.isEmpty(friends)}" class="text-sm text-gray-500">Chưa có bạn bè.</div>
+                        <div th:unless="${#lists.isEmpty(friends)}" class="grid grid-cols-3 gap-3">
+                            <a th:each="f,iter : ${friends}" th:if="${iter.index < 9}" th:href="@{/user/{id}(id=${f.id})}"
+                                class="flex flex-col items-center gap-2 hover:bg-gray-50 rounded-lg p-2 transition">
+                                <img th:if="${f.avatarUrl != null}" th:src="@{'/uploads_avatar/' + ${f.avatarUrl}}"
+                                    class="w-16 h-16 rounded-full object-cover border border-gray-200">
+                                <div th:if="${f.avatarUrl == null}" class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center font-semibold">
+                                    <span th:text="${#strings.substring(f.fullName,0,1).toUpperCase()}"></span>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900 text-center line-clamp-2" th:text="${f.fullName}">Tên</span>
+                            </a>
+                        </div>
+                    </div>
+
                     <div th:if="${currentUser != null}" class="bg-white rounded-lg shadow-sm p-4 mb-4">
                         <div class="flex items-center justify-between mb-3">
                             <h2 class="font-bold text-lg">Lời mời kết bạn</h2>
@@ -388,14 +407,116 @@
                                             </svg>
                                         </div>
                                     </div>
-                                    <button class="p-2 hover:bg-gray-100 rounded-full transition-smooth"
-                                        onclick="event.stopPropagation();">
-                                        <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                            <path
-                                                d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z">
-                                            </path>
-                                        </svg>
-                                    </button>
+                                    
+
+                                    <!-- MENU  -->
+                                    <div class="relative">
+                                        <button class="p-2 hover:bg-gray-100 rounded-full transition"
+                                            onclick="togglePostMenu(this); event.stopPropagation();">
+                                            <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                                            </svg>
+                                        </button>
+                                    
+                                        <!-- DROPDOWN MENU -->
+                                        <div class="post-menu absolute right-0 mt-2 w-40 bg-white shadow-lg border border-gray-200 rounded-lg z-50 hidden">
+                                    
+                                            <!-- Nếu là chủ bài viết -->
+                                            <a th:if="${currentUser != null and currentUser.id == post.author.id}"
+                                                th:href="@{/post/{id}/edit(id=${post.id})}" class="block px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
+                                                <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                                Chỉnh sửa
+                                            </a>
+                                    
+                                            <button th:if="${currentUser != null and currentUser.id == post.author.id}"
+                                                th:onclick="'openDeleteModal(' + ${post.id} + '); event.stopPropagation();'"
+                                                class="w-full text-left px-4 py-2 hover:bg-red-100 text-sm text-red-600">
+                                                <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                Xóa
+                                            </button>
+                                    
+                                            <!-- Nếu không phải chủ bài viết -->
+                                            <button th:unless="${currentUser != null and currentUser.id == post.author.id}"
+                                                th:onclick="'openReportModal(' + ${post.id} + '); event.stopPropagation();'"
+                                                class="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
+                                                <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                </svg>
+                                                Báo cáo
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- DELETE MODAL -->
+                                    <div id="deleteModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+                                        <div class="bg-white rounded-lg p-6 w-full max-w-sm shadow-xl">
+                                            <h2 class="text-xl font-semibold mb-4">Xóa bài viết?</h2>
+                                            <p class="text-gray-600 mb-6">Bạn chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác.</p>
+                                    
+                                            <div class="flex justify-end gap-3">
+                                                <button onclick="closeDeleteModal()" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
+                                                    Hủy
+                                                </button>
+                                    
+                                                <form id="deleteForm" method="POST">
+                                                    <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">
+                                                        Xóa
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- REPORT MODAL -->
+                                    <div id="reportModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+                                        <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
+                                            <h2 class="text-xl font-semibold mb-4">Báo cáo bài viết</h2>
+                                            <p class="text-gray-600 mb-4">Vui lòng chọn lý do báo cáo:</p>
+                                    
+                                            <form id="reportForm" onsubmit="submitReport(event)">
+                                                <div class="space-y-2 mb-4">
+                                                    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                                        <input type="radio" name="reason" value="Spam hoặc quảng cáo" required class="mr-3">
+                                                        <span>Spam hoặc quảng cáo</span>
+                                                    </label>
+                                                    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                                        <input type="radio" name="reason" value="Nội dung không phù hợp" class="mr-3">
+                                                        <span>Nội dung không phù hợp</span>
+                                                    </label>
+                                                    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                                        <input type="radio" name="reason" value="Thông tin sai sự thật" class="mr-3">
+                                                        <span>Thông tin sai sự thật</span>
+                                                    </label>
+                                                    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                                        <input type="radio" name="reason" value="Bạo lực hoặc ngôn từ thù ghét" class="mr-3">
+                                                        <span>Bạo lực hoặc ngôn từ thù ghét</span>
+                                                    </label>
+                                                    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                                        <input type="radio" name="reason" value="Khác" class="mr-3">
+                                                        <span>Khác</span>
+                                                    </label>
+                                                </div>
+                                    
+                                                <div class="flex justify-end gap-3">
+                                                    <button type="button" onclick="closeReportModal()"
+                                                        class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
+                                                        Hủy
+                                                    </button>
+                                    
+                                                    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                                                        Gửi báo cáo
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Post Content -->
@@ -748,6 +869,50 @@
                 }
             });
         });
+
+        // Toggle dropdown menu
+            function togglePostMenu(btn) {
+                const menu = btn.nextElementSibling;
+                document.querySelectorAll('.post-menu').forEach(m => {
+                    if (m !== menu) m.classList.add('hidden');
+                });
+                menu.classList.toggle('hidden');
+            }
+
+            // Tắt menu khi click ra ngoài
+            document.addEventListener("click", () => {
+                document.querySelectorAll(".post-menu").forEach(menu => menu.classList.add("hidden"));
+            });
+
+            // Delete Modal
+            let deletePostId = null;
+
+            function openDeleteModal(postId) {
+                deletePostId = postId;
+                document.getElementById('deleteModal').classList.remove('hidden');
+                document.getElementById('deleteModal').classList.add('flex');
+                document.getElementById('deleteForm').action = `/post/${postId}/delete`;
+            }
+
+            function closeDeleteModal() {
+                document.getElementById('deleteModal').classList.add('hidden');
+                document.getElementById('deleteModal').classList.remove('flex');
+            }
+
+            // Report Modal
+            let reportPostId = null;
+
+            function openReportModal(postId) {
+                reportPostId = postId;
+                document.getElementById('reportModal').classList.remove('hidden');
+                document.getElementById('reportModal').classList.add('flex');
+            }
+
+            function closeReportModal() {
+                document.getElementById('reportModal').classList.add('hidden');
+                document.getElementById('reportModal').classList.remove('flex');
+                document.getElementById('reportForm').reset();
+            }
     </script>
  </section>
     
