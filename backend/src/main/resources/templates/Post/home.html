@@ -46,7 +46,7 @@
         <!-- DANH SÁCH BÀI VIẾT -->
         <article th:each="post : ${posts}"
             class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
-            th:attr="data-post-id=${post.id},data-user-reaction=${userReactions.get(post.id)}">
+            th:attr="data-post-id=${post.id},data-user-reaction=${userReactions != null ? userReactions.get(post.id) : ''}">
 
             <!-- ============ HEADER ============ -->
             <header class="flex items-center justify-between p-4">

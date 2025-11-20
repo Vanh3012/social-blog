@@ -13,35 +13,29 @@
 
             <!-- PROFILE HEADER CARD -->
             <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
-
-                <!-- Cover Photo -->
+                <!-- Cover -->
                 <div class="relative">
-                    <div class="h-[250px] relative mb-2 overflow-hidden">
-                        <!-- Cover image if exists -->
+                    <div class="h-[400px] relative mb-7 overflow-hidden">
                         <img th:if="${profileUser.coverUrl != null}" th:src="@{'/uploads_avatar/' + ${profileUser.coverUrl}}"
                             class="w-full h-full object-cover absolute inset-0">
-                        <!-- Default gradient background -->
                         <div th:unless="${profileUser.coverUrl != null}"
-                            class="w-full h-full bg-gradient-to-br from-blue-300 via-blue-500 to-indigo-600 absolute inset-0"></div>
-                        <!-- Overlay -->
-                        <div class="absolute inset-0 bg-black/10"></div>
+                            class="w-full h-full bg-gradient-to-br from-blue-400 via-blue-600 to-indigo-700 absolute inset-0"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30"></div>
+                        <a th:if="${profileUser.coverUrl != null}" th:href="@{'/uploads_avatar/' + ${profileUser.coverUrl}}"
+                            target="_blank" rel="noopener" aria-label="Xem ảnh bìa"
+                            class="absolute inset-0 z-10"></a>
                     </div>
-                
-                    <!-- Edit Cover Button (if own profile) -->
-                    <div th:if="${currentUser != null and currentUser.id == profileUser.id}" class="absolute bottom-4 right-4 z-10">
+                    <div th:if="${currentUser != null and currentUser.id == profileUser.id}" class="absolute bottom-4 right-4 z-20">
                         <button type="button" onclick="document.getElementById('coverInput').click()"
                             class="px-4 py-2 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition flex items-center gap-2 shadow-lg">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
-                                </path>
+                                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
-                           Chỉnh sửa ảnh bìa
+                            Chỉnh sửa ảnh bìa
                         </button>
-                
-                        <!-- Hidden form for cover upload -->
                         <form th:action="@{/user/{id}/cover(id=${profileUser.id})}" method="post" enctype="multipart/form-data"
                             id="coverForm" style="display: none;">
                             <input type="file" id="coverInput" name="cover" accept="image/*" onchange="this.form.submit()">
@@ -49,52 +43,42 @@
                     </div>
                 </div>
 
-                <!-- Profile Info Section -->
-                <div class="px-6 pb-4">
-                
-                    <!-- Avatar & Name Row -->
-                    <div class="flex flex-col md:flex-row md:items-end md:justify-between -mt-12 mb-4">
-                
-                        <div class="flex flex-col md:flex-row md:items-end gap-4">
-                            <!-- Avatar -->
-                            <div class="relative z-20">
-                                <div class="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-xl bg-gray-200">
-                                    <img th:if="${profileUser.avatarUrl != null}"
-                                        th:src="@{'/uploads_avatar/' + ${profileUser.avatarUrl}}" class="w-full h-full object-cover">
+                <!-- Profile info -->
+                <div class="px-4 sm:px-6 pb-4 pt-4">
+                    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 -mt-12 md:-mt-14">
+                        <div class="flex flex-col md:flex-row md:items-center gap-4">
+                            <div class="relative w-44 h-44 rounded-full border-4 border-white shadow-xl bg-gray-200 overflow-visible">
+                                <div class="w-full h-full rounded-full overflow-hidden">
+                                    <img th:if="${profileUser.avatarUrl != null}" th:src="@{'/uploads_avatar/' + ${profileUser.avatarUrl}}"
+                                        class="w-full h-full object-cover">
                                     <div th:unless="${profileUser.avatarUrl != null}"
-                                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-indigo-500 text-white text-5xl font-bold">
+                                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-indigo-600 text-white text-6xl font-bold">
                                         <span th:text="${#strings.substring(profileUser.fullName, 0, 1).toUpperCase()}"></span>
                                     </div>
                                 </div>
-                
-                                <!-- Edit Avatar Button (if own profile) -->
+                                <a th:if="${profileUser.avatarUrl != null}" th:href="@{'/uploads_avatar/' + ${profileUser.avatarUrl}}"
+                                    target="_blank" rel="noopener" aria-label="Xem ảnh đại diện"
+                                    class="absolute inset-0 rounded-full z-10"></a>
                                 <button th:if="${currentUser != null and currentUser.id == profileUser.id}" type="button"
                                     onclick="document.getElementById('avatarInput').click()"
-                                    class="absolute bottom-2 right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition">
+                                    class="absolute -bottom-2 -right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-lg z-20 hover:bg-gray-50 transition">
                                     <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
-                                        </path>
+                                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     </svg>
                                 </button>
-                
-                                <!-- Hidden form for avatar upload -->
                                 <form th:action="@{/user/{id}/avatar(id=${profileUser.id})}" method="post" enctype="multipart/form-data"
                                     id="avatarForm" style="display: none;">
                                     <input type="file" id="avatarInput" name="avatar" accept="image/*" onchange="this.form.submit()">
                                 </form>
                             </div>
-                
-                            <!-- Name & Username -->
-                            <div class="pb-0">
-                                <h1 class="text-3xl font-bold text-gray-900 mt-1" th:text="${profileUser.fullName}"></h1>
-                                <p class="text-gray-500 mt-1" th:text="'@' + ${profileUser.username}"></p>
-                
-                                
-                                <!-- Stats -->
-                                <div class="flex gap-4 mt-3 text-sm">
+
+                            <div class="pb-2">
+                                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900" th:text="${profileUser.fullName}"></h1>
+                                <p class="text-gray-500 mt-1 text-sm sm:text-base" th:text="'@' + ${profileUser.username}"></p>
+                                <div class="flex flex-wrap gap-4 mt-3 text-sm text-gray-700">
                                     <div>
                                         <span class="font-semibold text-gray-900" th:text="${#lists.size(posts)}">0</span>
                                         <span class="text-gray-500">bài viết</span>
@@ -110,83 +94,126 @@
                                 </div>
                             </div>
                         </div>
-                
-                        <!-- Action Buttons -->
-                        <div class="flex gap-2 mt-4 md:mt-0 pb-4">
-                
-                            <!-- If own profile -->
+
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 pb-2">
                             <div th:if="${currentUser != null and currentUser.id == profileUser.id}">
-                                <a th:href="@{/user/{id}/edit(id=${profileUser.id})}" class="px-3 py-1.5 bg-blue-600 text-white rounded-md text-sm font-medium 
-                                           hover:bg-blue-700 transition flex items-center gap-1 shadow-sm">
-                            
+                                <a th:href="@{/user/{id}/edit(id=${profileUser.id})}" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium 
+                                           hover:bg-blue-700 transition flex items-center gap-2 shadow-sm">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414
                                                a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                     </svg>
-                            
-                                    <span>Chỉnh sửa</span>
+                                    Chỉnh sửa
                                 </a>
                             </div>
-                
-                            <!-- If other's profile -->
-                            <div th:unless="${currentUser != null and currentUser.id == profileUser.id}" class="flex gap-2" id="friend-action-wrap">
-                                <button
-                                    class="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                    </svg>
-                                    Thêm bạn bè
-                                </button>
-                
-                                <button
-                                    class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
-                                        </path>
-                                    </svg>
-                                    Nhắn tin
-                                </button>
-                
-                                <button
-                                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z">
-                                        </path>
-                                    </svg>
-                                </button>
+
+                            <div th:unless="${currentUser != null and currentUser.id == profileUser.id}" class="flex gap-2 flex-wrap" id="friend-action-wrap">
+                                <div th:if="${currentUser == null}">
+                                    <a href="/login"
+                                        class="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                        Đăng nhập để kết bạn
+                                    </a>
+                                </div>
+
+                                <div th:if="${currentUser != null}" class="flex gap-2 flex-wrap items-center"
+                                    th:attr="data-profile-id=${profileUser.id},data-friendship-id=${friendshipId}">
+                                    <div th:switch="${friendshipStatus}">
+                                        <div th:case="'ACCEPTED'">
+                                            <button class="px-5 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold flex items-center gap-2" disabled>
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                                Đã là bạn bè
+                                            </button>
+                                        </div>
+                                        <div th:case="'PENDING'">
+                                            <div th:if="${isRequestSender}" class="flex gap-2 flex-wrap items-center">
+                                                <button class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold flex items-center gap-2" disabled>
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                    </svg>
+                                                    Đã gửi lời mời
+                                                </button>
+                                                <button type="button"
+                                                    class="px-5 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition"
+                                                    th:attr="data-friendship-id=${friendshipId}"
+                                                    onclick="friendAction('cancel', this.dataset.friendshipId)">
+                                                    Hủy lời mời
+                                                </button>
+                                            </div>
+                                            <div th:unless="${isRequestSender}" class="flex gap-2 flex-wrap">
+                                                <button type="button"
+                                                    class="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                                                    th:attr="data-friendship-id=${friendshipId}"
+                                                    onclick="friendAction('accept', this.dataset.friendshipId)">
+                                                    Chấp nhận
+                                                </button>
+                                                <button type="button"
+                                                    class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition"
+                                                    th:attr="data-friendship-id=${friendshipId}"
+                                                    onclick="friendAction('decline', this.dataset.friendshipId)">
+                                                    Từ chối
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div th:case="'BLOCKED'">
+                                            <button class="px-5 py-2 bg-gray-300 text-gray-600 rounded-lg text-sm font-medium flex items-center gap-2" disabled>
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636A9 9 0 105.636 18.364 9 9 0 0018.364 5.636zM15 9l-6 6"></path>
+                                                </svg>
+                                                Đang chặn
+                                            </button>
+                                        </div>
+                                        <div th:case="*">
+                                            <button type="button"
+                                                class="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition flex items-center gap-2"
+                                                th:inline="text"
+                                                th:attr="data-user-id=${profileUser.id}"
+                                                onclick="friendAction('request', this.dataset.userId)">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                </svg>
+                                                Thêm bạn bè
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button
+                                        class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                                            </path>
+                                        </svg>
+                                        Nhắn tin
+                                    </button>
+                                </div>
                             </div>
-                
                         </div>
                     </div>
 
-                    <!-- Navigation Tabs -->
-                    <div class="border-t border-gray-200 pt-2">
-                        <div class="flex gap-2 overflow-x-auto">
-                            <button
-                                class="px-6 py-3 text-sm font-medium text-blue-600 border-b-2 border-blue-600 whitespace-nowrap">
+                    <!-- Tabs -->
+                    <div class="mt-4 border-t border-gray-200">
+                        <div class="flex gap-1 overflow-x-auto">
+                            <button class="px-5 py-3 text-sm font-semibold text-blue-600 border-b-2 border-blue-600 whitespace-nowrap">
                                 Bài viết
                             </button>
-                            <button
-                                class="px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg whitespace-nowrap transition-smooth">
+                            <button class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">
                                 Giới thiệu
                             </button>
-                            <button
-                                class="px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg whitespace-nowrap transition-smooth">
+                            <button class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">
                                 Bạn bè
                             </button>
-                            <button
-                                class="px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg whitespace-nowrap transition-smooth">
+                            <button class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">
                                 Ảnh
                             </button>
-                            <button
-                                class="px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg whitespace-nowrap transition-smooth">
+                            <button class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">
                                 Video
                             </button>
                         </div>
                     </div>
-
                 </div>
             </div>
 
@@ -208,6 +235,62 @@
                         </div>
 
                         
+                    </div>
+
+                    <div th:if="${currentUser != null}" class="bg-white rounded-lg shadow-sm p-4 mb-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="font-bold text-lg">Lời mời kết bạn</h2>
+                            <span class="text-sm text-gray-500" th:text="${#lists.size(pendingFriendRequests)} + ' lời mời'">0 lời mời</span>
+                        </div>
+                        <div th:if="${#lists.isEmpty(pendingFriendRequests)}" class="text-sm text-gray-500">Không có lời mời.</div>
+                        <div th:each="fr : ${pendingFriendRequests}" class="flex items-center justify-between mb-3 last:mb-0">
+                            <div class="flex items-center gap-3">
+                                <img th:if="${fr.sender.avatarUrl != null}" th:src="@{'/uploads_avatar/' + ${fr.sender.avatarUrl}}"
+                                    class="w-10 h-10 rounded-full object-cover">
+                                <div th:if="${fr.sender.avatarUrl == null}" class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-semibold">
+                                    <span th:text="${#strings.substring(fr.sender.fullName,0,1).toUpperCase()}"></span>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-900" th:text="${fr.sender.fullName}">Tên</p>
+                                    <p class="text-xs text-gray-500" th:text="'@' + ${fr.sender.username}"></p>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="button" class="px-3 py-1.5 bg-blue-600 text-white rounded-md text-sm"
+                                    th:attr="data-friendship-id=${fr.id}" onclick="friendAction('accept', this.dataset.friendshipId)">
+                                    Chấp nhận
+                                </button>
+                                <button type="button" class="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-md text-sm"
+                                    th:attr="data-friendship-id=${fr.id}" onclick="friendAction('decline', this.dataset.friendshipId)">
+                                    Từ chối
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${currentUser != null}" class="bg-white rounded-lg shadow-sm p-4 mb-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="font-bold text-lg">Gợi ý kết bạn</h2>
+                            <span class="text-sm text-gray-500" th:text="${#lists.size(friendSuggestions)} + ' gợi ý'">0 gợi ý</span>
+                        </div>
+                        <div th:if="${#lists.isEmpty(friendSuggestions)}" class="text-sm text-gray-500">Không có gợi ý.</div>
+                        <div th:each="u : ${friendSuggestions}" class="flex items-center justify-between mb-3 last:mb-0">
+                            <div class="flex items-center gap-3">
+                                <img th:if="${u.avatarUrl != null}" th:src="@{'/uploads_avatar/' + ${u.avatarUrl}}"
+                                    class="w-10 h-10 rounded-full object-cover">
+                                <div th:if="${u.avatarUrl == null}" class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-semibold">
+                                    <span th:text="${#strings.substring(u.fullName,0,1).toUpperCase()}"></span>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-900" th:text="${u.fullName}">Tên</p>
+                                    <p class="text-xs text-gray-500" th:text="'@' + ${u.username}"></p>
+                                </div>
+                            </div>
+                            <button type="button" class="px-3 py-1.5 bg-blue-600 text-white rounded-md text-sm"
+                                th:attr="data-user-id=${u.id}" onclick="friendAction('request', this.dataset.userId)">
+                                Kết bạn
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Photos Section -->
@@ -280,7 +363,7 @@
 
                         <!-- Post Card -->
                         <article th:each="post : ${posts}" class="bg-white rounded-lg shadow-sm hover:shadow-md transition-smooth"
-                            th:attr="data-post-id=${post.id}, data-user-reaction=${userReactions.get(post.id)}">
+                            th:attr="data-post-id=${post.id},data-user-reaction=${userReactions != null ? userReactions.get(post.id) : ''}">
 
                             <div class="p-4 pb-3 cursor-pointer" th:onclick="'window.location.href=\'/post/' + '[[${post.id}]]' + '\''">
 
@@ -492,9 +575,44 @@
                             </footer>
 
                         </article>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 <!-- ====================== SCRIPT ====================== -->
 <section th:fragment="script">
     <script>
+        function friendAction(action, targetId) {
+            let url = '';
+            switch (action) {
+                case 'request':
+                    url = `/friend/request/${targetId}`;
+                    break;
+                case 'accept':
+                    url = `/friend/${targetId}/accept`;
+                    break;
+                case 'decline':
+                    url = `/friend/${targetId}/decline`;
+                    break;
+                case 'cancel':
+                    url = `/friend/${targetId}/cancel`;
+                    break;
+                default:
+                    return;
+            }
+            fetch(url, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Co loi xay ra');
+                    }
+                })
+                .catch(() => alert('Vui long dang nhap'));
+        }
+
         let hideTimeout = null;
 
         function showReactionPopup(button) {
@@ -631,4 +749,7 @@
             });
         });
     </script>
- 
+ </section>
+    
+ </body>
+    </html>

@@ -20,7 +20,9 @@ public class FriendshipService {
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
 
+    // ==================== SEND REQUEST ====================
     public Friendship sendRequest(Long senderId, Long receiverId) {
+
         if (senderId.equals(receiverId)) {
             throw new RuntimeException("Không thể kết bạn với chính mình");
         }
@@ -30,71 +32,87 @@ public class FriendshipService {
         User receiver = userRepository.findById(receiverId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người nhận"));
 
-        Optional<Friendship> existing = friendshipRepository.findBetween(senderId, receiverId);
-        if (existing.isPresent()) {
-            Friendship f = existing.get();
-            if (f.getStatus() == FriendshipStatus.PENDING) {
-                throw new RuntimeException("Đã gửi lời mời trước đó");
+        // Kiểm tra quan hệ đã tồn tại chưa
+        Optional<Friendship> exist = friendshipRepository.findBetween(senderId, receiverId);
+
+        if (exist.isPresent()) {
+            Friendship f = exist.get();
+
+            switch (f.getStatus()) {
+                case PENDING -> throw new RuntimeException("Đã gửi lời mời trước đó");
+                case ACCEPTED -> throw new RuntimeException("Hai bạn đã là bạn bè");
+                case BLOCKED -> throw new RuntimeException("Không thể kết bạn vì bị chặn");
+                case DECLINED -> {
+                    // Cho phép gửi lại: reset trạng thái
+                    f.setSender(sender);
+                    f.setReceiver(receiver);
+                    f.setStatus(FriendshipStatus.PENDING);
+                    return friendshipRepository.save(f);
+                }
             }
-            if (f.getStatus() == FriendshipStatus.ACCEPTED) {
-                throw new RuntimeException("Hai bạn đã là bạn bè");
-            }
-            if (f.getStatus() == FriendshipStatus.BLOCKED) {
-                throw new RuntimeException("Kết bạn bị chặn");
-            }
-            // Nếu đã bị từ chối thì cho phép gửi lại, cập nhật sender/receiver mới
-            f.setSender(sender);
-            f.setReceiver(receiver);
-            f.setStatus(FriendshipStatus.PENDING);
-            return friendshipRepository.save(f);
         }
 
+        // Tạo mới
         Friendship friendship = Friendship.builder()
                 .sender(sender)
                 .receiver(receiver)
                 .status(FriendshipStatus.PENDING)
                 .build();
+
         return friendshipRepository.save(friendship);
     }
 
-    public Friendship accept(Long friendshipId, Long currentUserId) {
-        Friendship friendship = findById(friendshipId);
-        if (!friendship.getReceiver().getId().equals(currentUserId)) {
-            throw new RuntimeException("Không có quyền chấp nhận lời mời này");
+    // ==================== ACCEPT ====================
+    public Friendship accept(Long id, Long currentUserId) {
+        Friendship f = findById(id);
+
+        if (!f.getReceiver().getId().equals(currentUserId)) {
+            throw new RuntimeException("Không có quyền chấp nhận");
         }
-        if (friendship.getStatus() != FriendshipStatus.PENDING) {
-            throw new RuntimeException("Lời mời đã được xử lý");
+
+        if (f.getStatus() != FriendshipStatus.PENDING) {
+            throw new RuntimeException("Không hợp lệ");
         }
-        friendship.setStatus(FriendshipStatus.ACCEPTED);
-        return friendshipRepository.save(friendship);
+
+        f.setStatus(FriendshipStatus.ACCEPTED);
+        return friendshipRepository.save(f);
     }
 
-    public Friendship decline(Long friendshipId, Long currentUserId) {
-        Friendship friendship = findById(friendshipId);
-        if (!friendship.getReceiver().getId().equals(currentUserId)) {
-            throw new RuntimeException("Không có quyền từ chối lời mời này");
+    // ==================== DECLINE ====================
+    public Friendship decline(Long id, Long currentUserId) {
+        Friendship f = findById(id);
+
+        if (!f.getReceiver().getId().equals(currentUserId)) {
+            throw new RuntimeException("Không có quyền từ chối");
         }
-        friendship.setStatus(FriendshipStatus.DECLINED);
-        return friendshipRepository.save(friendship);
+
+        f.setStatus(FriendshipStatus.DECLINED);
+        return friendshipRepository.save(f);
     }
 
-    public void cancel(Long friendshipId, Long currentUserId) {
-        Friendship friendship = findById(friendshipId);
-        if (!friendship.getSender().getId().equals(currentUserId)) {
-            throw new RuntimeException("Không có quyền hủy lời mời này");
+    // ==================== CANCEL ====================
+    public void cancel(Long id, Long currentUserId) {
+        Friendship f = findById(id);
+
+        if (!f.getSender().getId().equals(currentUserId)) {
+            throw new RuntimeException("Không có quyền hủy");
         }
-        if (friendship.getStatus() != FriendshipStatus.PENDING) {
-            throw new RuntimeException("Lời mời đã được xử lý");
+
+        if (f.getStatus() != FriendshipStatus.PENDING) {
+            throw new RuntimeException("Không hợp lệ");
         }
-        friendshipRepository.delete(friendship);
+
+        friendshipRepository.delete(f);
     }
 
-    public Optional<Friendship> findBetween(Long user1, Long user2) {
-        return friendshipRepository.findBetween(user1, user2);
+    // ==================== STATUS ====================
+    public Optional<Friendship> findBetween(Long u1, Long u2) {
+        return friendshipRepository.findBetween(u1, u2);
     }
 
-    public List<Friendship> listAccepted(Long userId) {
-        return friendshipRepository.findAcceptedFriends(userId);
+    private Friendship findById(Long id) {
+        return friendshipRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy quan hệ"));
     }
 
     public List<Friendship> listPendingReceived(Long userId) {
@@ -108,21 +126,22 @@ public class FriendshipService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
 
         List<Friendship> relations = friendshipRepository.findBySenderOrReceiver(me, me);
-        // Loại trừ tất cả người đã có quan hệ (dù pending/accepted/blocked) và chính mình.
+
+        // Danh sách user đã có quan hệ
         var excluded = relations.stream()
-                .flatMap(f -> java.util.stream.Stream.of(f.getSender().getId(), f.getReceiver().getId()))
+                .flatMap(f -> java.util.stream.Stream.of(
+                        f.getSender().getId(),
+                        f.getReceiver().getId()))
                 .collect(java.util.stream.Collectors.toSet());
-        excluded.add(userId);
+
+        excluded.add(userId); // loại chính mình
 
         List<User> all = userRepository.findAll();
+
         return all.stream()
                 .filter(u -> !excluded.contains(u.getId()))
-                .limit(Math.max(limit, 0))
+                .limit(limit)
                 .toList();
     }
 
-    private Friendship findById(Long id) {
-        return friendshipRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy lời mời"));
-    }
 }

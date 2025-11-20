@@ -13,7 +13,7 @@
             <header class="flex items-center justify-between p-4">
                 <div class="flex items-center gap-3">
                     <!-- Avatar -->
-                    <a th:href="@{/profile/{username}(username=${post.author.username})}" class="flex-shrink-0">
+                    <a th:href="@{/user/{id}(id=${post.author.id})}" class="flex-shrink-0">
                         <img th:if="${post.author.avatarUrl != null}" th:src="@{'/uploads_avatar/' + ${post.author.avatarUrl}}"
                             class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100">
                         <div th:if="${post.author.avatarUrl == null}"
@@ -24,7 +24,7 @@
 
                     <!-- Tên + Thời gian -->
                     <div>
-                        <a th:href="@{/profile/{username}(username=${post.author.username})}"
+                        <a th:href="@{/user/{id}(id=${post.author.id})}"
                             class="font-semibold text-base text-gray-900 hover:underline"
                             th:text="${post.author.fullName}">fullName</a>
                         <div class="flex items-center gap-1 text-xs text-gray-500">
@@ -420,7 +420,7 @@
                             <div class="flex-1">
                                 <!-- Nội dung comment -->
                                 <div class="bg-gray-100 px-3 py-2 rounded-2xl inline-block">
-                                    <a th:href="@{/profile/{username}(fullName=${c.author.fullName})}"
+                                    <a th:href="@{/user/{id}(id=${c.author.id})}"
                                         class="font-semibold text-sm text-gray-900 hover:underline"
                                         th:text="${c.author.fullName}">fullName</a>
                                     <p class="text-[15px] text-gray-800 mt-0.5" th:text="${c.content}">content</p>
@@ -512,7 +512,7 @@
                                         <!--nội dung comment con-->
                                         <div class="flex-1">
                                             <div class="bg-gray-100 px-3 py-2 rounded-2xl inline-block">
-                                                <a th:href="@{/profile/{username}(username=${r.author.username})}"
+                                                <a th:href="@{/user/{id}(id=${r.author.id})}"
                                                     class="font-semibold text-sm text-gray-900 hover:underline"
                                                     th:text="${r.author.fullName}">fullName</a>
                                                 <p class="text-[15px] text-gray-800 mt-0.5" th:text="${r.content}">reply

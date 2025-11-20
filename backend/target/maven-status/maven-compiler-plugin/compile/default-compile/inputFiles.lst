@@ -23,6 +23,7 @@ D:\VSCode\social-blog\backend\src\main\java\com\socialblog\controller\HomeContro
 D:\VSCode\social-blog\backend\src\main\java\com\socialblog\dto\RegisterRequest.java
 D:\VSCode\social-blog\backend\src\main\java\com\socialblog\dto\CommentDTO.java
 D:\VSCode\social-blog\backend\src\main\java\com\socialblog\dto\CommentRequest.java
+D:\VSCode\social-blog\backend\src\main\java\com\socialblog\dto\FriendshipRequestDto.java
 D:\VSCode\social-blog\backend\src\main\java\com\socialblog\model\entity\Message.java
 D:\VSCode\social-blog\backend\src\main\java\com\socialblog\controller\CommentController.java
 D:\VSCode\social-blog\backend\src\main\java\com\socialblog\dto\PostRequest.java

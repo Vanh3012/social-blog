@@ -2,7 +2,6 @@ package com.socialblog.controller;
 
 import com.socialblog.dto.UserDTO;
 import com.socialblog.model.entity.Post;
-import com.socialblog.model.entity.Reaction;
 import com.socialblog.model.entity.User;
 import com.socialblog.model.entity.Friendship;
 import com.socialblog.repository.ReactionRepository;

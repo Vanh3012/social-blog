@@ -6,15 +6,12 @@ import com.socialblog.model.entity.Post;
 import com.socialblog.model.entity.User;
 import com.socialblog.model.enums.Visibility;
 import com.socialblog.repository.UserRepository;
-import com.socialblog.repository.ReactionRepository;
 import com.socialblog.service.PostService;
 import com.socialblog.service.ReactionService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.socialblog.dto.CommentRequest;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/post")
@@ -35,7 +30,6 @@ public class PostController {
     private final PostService postService;
     private final ReactionService reactionService;
     private final UserRepository userRepository;
-    private final ReactionRepository userReaction;
 
     // HIỂN THỊ FORM TẠO BÀI
     @GetMapping("/create")

@@ -3,9 +3,12 @@ package com.socialblog.controller;
 import com.socialblog.dto.UserDTO;
 import com.socialblog.model.entity.Post;
 import com.socialblog.model.entity.PostImage;
+import com.socialblog.model.entity.Friendship;
 import com.socialblog.model.entity.User;
+import com.socialblog.model.enums.FriendshipStatus;
 import com.socialblog.model.enums.Visibility;
 import com.socialblog.repository.PostRepository;
+import com.socialblog.repository.ReactionRepository;
 import com.socialblog.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +24,13 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.socialblog.service.ProfileService;
 import com.socialblog.repository.PostImageRepository;
-import com.socialblog.service.ReactionService;
+import com.socialblog.service.FriendshipService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -35,7 +40,8 @@ public class ProfileController {
     private final PostRepository postRepository;
     private final ProfileService profileService;
     private final PostImageRepository postImageRepository;
-    private final ReactionService reactionService;
+    private final ReactionRepository reactionRepository;
+    private final FriendshipService friendshipService;
 
     // ====================== XEM PROFILE USER ======================
     @GetMapping("/user/{id}")
@@ -49,6 +55,11 @@ public class ProfileController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<Post> posts;
+        List<Friendship> pendingRequests = List.of();
+        List<User> friendSuggestions = List.of();
+        String friendshipStatus = FriendshipStatus.NONE.name();
+        Long friendshipId = null;
+        boolean isRequestSender = false;
 
         // Nếu chủ trang vào xem → show ALL posts
         if (currentUserDTO != null && currentUserDTO.getId().equals(id)) {
@@ -66,10 +77,41 @@ public class ProfileController {
             allImages.addAll(p.getImages());
         }
 
+        // Lấy reaction của current user cho từng post
+        Map<Long, String> userReactions = new HashMap<>();
+
+        if (currentUserDTO != null) {
+            User currentUser = userRepository.findById(currentUserDTO.getId())
+                    .orElse(null);
+
+            if (currentUser != null) {
+                for (Post post : posts) {
+                    reactionRepository.findByPostAndUser(post, currentUser)
+                            .ifPresent(reaction -> userReactions.put(post.getId(), reaction.getType().name()));
+                }
+
+                Friendship friendship = friendshipService.findBetween(currentUserDTO.getId(), profileUser.getId())
+                        .orElse(null);
+                if (friendship != null) {
+                    friendshipStatus = friendship.getStatus().name();
+                    friendshipId = friendship.getId();
+                    isRequestSender = friendship.getSender().getId().equals(currentUserDTO.getId());
+                }
+
+                pendingRequests = friendshipService.listPendingReceived(currentUserDTO.getId());
+                friendSuggestions = friendshipService.suggestFriends(currentUserDTO.getId(), 5);
+            }
+        }
+        model.addAttribute("userReactions", userReactions);
         model.addAttribute("profileUser", profileUser);
         model.addAttribute("posts", posts);
         model.addAttribute("currentUser", currentUserDTO);
         model.addAttribute("images", allImages);
+        model.addAttribute("friendshipStatus", friendshipStatus);
+        model.addAttribute("friendshipId", friendshipId);
+        model.addAttribute("isRequestSender", isRequestSender);
+        model.addAttribute("pendingFriendRequests", pendingRequests);
+        model.addAttribute("friendSuggestions", friendSuggestions);
 
         return "User/profile";
     }

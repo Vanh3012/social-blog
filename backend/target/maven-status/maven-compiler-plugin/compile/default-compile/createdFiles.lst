@@ -34,6 +34,7 @@ com\socialblog\repository\FriendshipRepository.class
 com\socialblog\SocialblogApplication.class
 com\socialblog\controller\ProfileController.class
 com\socialblog\model\enums\NotificationType.class
+com\socialblog\service\FriendshipService$1.class
 com\socialblog\model\enums\ConversationType.class
 com\socialblog\dto\CommentDTO.class
 com\socialblog\model\entity\User$UserBuilder.class
@@ -55,6 +56,7 @@ com\socialblog\service\ReactionService.class
 com\socialblog\model\entity\Comment.class
 com\socialblog\controller\HomeController.class
 com\socialblog\service\AuthService.class
+com\socialblog\dto\FriendshipRequestDto.class
 com\socialblog\model\entity\Friendship$FriendshipBuilder.class
 com\socialblog\service\NotificationService.class
 com\socialblog\config\WebConfig.class

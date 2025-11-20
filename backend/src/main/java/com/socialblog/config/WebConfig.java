@@ -14,8 +14,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // Đăng ký AuthInterceptor cho tất cả các đường dẫn ngoại trừ những đường dẫn
+        // tĩnh và trang đăng nhập/đăng ký
         registry.addInterceptor(authInterceptor)
-                .addPathPatterns("/**")
+                .addPathPatterns("/**", "/user/**")
                 .excludePathPatterns(
                         "/auth/**",
                         "/css/**",
@@ -29,5 +31,9 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("classpath:/static/uploads/");
+
+        registry.addResourceHandler("/uploads_avatar/**")
+                .addResourceLocations("classpath:/static/uploads_avatar/");
+
     }
 }
