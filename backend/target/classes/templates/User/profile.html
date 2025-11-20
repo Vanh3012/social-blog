@@ -16,16 +16,21 @@
 
                 <!-- Cover Photo -->
                 <div class="relative">
-                    <div class="h-[400px] bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600 relative">
-                        <!-- Optional: Cover image -->
+                    <div class="h-[250px] relative mb-2 overflow-hidden">
+                        <!-- Cover image if exists -->
+                        <img th:if="${profileUser.coverUrl != null}" th:src="@{'/uploads_avatar/' + ${profileUser.coverUrl}}"
+                            class="w-full h-full object-cover absolute inset-0">
+                        <!-- Default gradient background -->
+                        <div th:unless="${profileUser.coverUrl != null}"
+                            class="w-full h-full bg-gradient-to-br from-blue-300 via-blue-500 to-indigo-600 absolute inset-0"></div>
+                        <!-- Overlay -->
                         <div class="absolute inset-0 bg-black/10"></div>
                     </div>
-
+                
                     <!-- Edit Cover Button (if own profile) -->
-                    <div th:if="${currentUser != null and currentUser.id == profileUser.id}"
-                        class="absolute bottom-4 right-4">
-                        <button
-                            class="px-4 py-2 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-smooth flex items-center gap-2 shadow-lg">
+                    <div th:if="${currentUser != null and currentUser.id == profileUser.id}" class="absolute bottom-4 right-4 z-10">
+                        <button type="button" onclick="document.getElementById('coverInput').click()"
+                            class="px-4 py-2 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition flex items-center gap-2 shadow-lg">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
@@ -33,35 +38,40 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
-                            Chỉnh sửa ảnh bìa
+                           Chỉnh sửa ảnh bìa
                         </button>
+                
+                        <!-- Hidden form for cover upload -->
+                        <form th:action="@{/user/{id}/cover(id=${profileUser.id})}" method="post" enctype="multipart/form-data"
+                            id="coverForm" style="display: none;">
+                            <input type="file" id="coverInput" name="cover" accept="image/*" onchange="this.form.submit()">
+                        </form>
                     </div>
                 </div>
 
                 <!-- Profile Info Section -->
                 <div class="px-6 pb-4">
-
+                
                     <!-- Avatar & Name Row -->
-                    <div class="flex flex-col md:flex-row md:items-end md:justify-between -mt-20 mb-4">
-
+                    <div class="flex flex-col md:flex-row md:items-end md:justify-between -mt-12 mb-4">
+                
                         <div class="flex flex-col md:flex-row md:items-end gap-4">
                             <!-- Avatar -->
-                            <div class="relative">
-                                <div
-                                    class="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-xl bg-gray-200">
-                                    <img th:if="${profileUser.avatarUrl != null}" th:src="${profileUser.avatarUrl}"
-                                        class="w-full h-full object-cover">
+                            <div class="relative z-20">
+                                <div class="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-xl bg-gray-200">
+                                    <img th:if="${profileUser.avatarUrl != null}"
+                                        th:src="@{'/uploads_avatar/' + ${profileUser.avatarUrl}}" class="w-full h-full object-cover">
                                     <div th:unless="${profileUser.avatarUrl != null}"
                                         class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-indigo-500 text-white text-5xl font-bold">
-                                        <span th:text="${#strings.substring(profileUser.fullName, 0, 1)}"></span>
+                                        <span th:text="${#strings.substring(profileUser.fullName, 0, 1).toUpperCase()}"></span>
                                     </div>
                                 </div>
-
+                
                                 <!-- Edit Avatar Button (if own profile) -->
-                                <button th:if="${currentUser != null and currentUser.id == profileUser.id}"
-                                    class="absolute bottom-2 right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-smooth">
-                                    <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+                                <button th:if="${currentUser != null and currentUser.id == profileUser.id}" type="button"
+                                    onclick="document.getElementById('avatarInput').click()"
+                                    class="absolute bottom-2 right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition">
+                                    <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
                                         </path>
@@ -69,17 +79,24 @@
                                             d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     </svg>
                                 </button>
+                
+                                <!-- Hidden form for avatar upload -->
+                                <form th:action="@{/user/{id}/avatar(id=${profileUser.id})}" method="post" enctype="multipart/form-data"
+                                    id="avatarForm" style="display: none;">
+                                    <input type="file" id="avatarInput" name="avatar" accept="image/*" onchange="this.form.submit()">
+                                </form>
                             </div>
-
+                
                             <!-- Name & Username -->
-                            <div class="pb-4">
-                                <h1 class="text-3xl font-bold text-gray-900" th:text="${profileUser.fullName}"></h1>
+                            <div class="pb-0">
+                                <h1 class="text-3xl font-bold text-gray-900 mt-1" th:text="${profileUser.fullName}"></h1>
                                 <p class="text-gray-500 mt-1" th:text="'@' + ${profileUser.username}"></p>
-
+                
+                                
                                 <!-- Stats -->
                                 <div class="flex gap-4 mt-3 text-sm">
                                     <div>
-                                        <span class="font-semibold text-gray-900">234</span>
+                                        <span class="font-semibold text-gray-900" th:text="${#lists.size(posts)}">0</span>
                                         <span class="text-gray-500">bài viết</span>
                                     </div>
                                     <div>
@@ -93,37 +110,36 @@
                                 </div>
                             </div>
                         </div>
-
+                
                         <!-- Action Buttons -->
                         <div class="flex gap-2 mt-4 md:mt-0 pb-4">
-
+                
                             <!-- If own profile -->
-                            <div th:if="${currentUser != null and currentUser.id == profileUser.id}" class="flex gap-2">
-                                <a href="/user/edit"
-                                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-smooth flex items-center gap-2">
+                            <div th:if="${currentUser != null and currentUser.id == profileUser.id}">
+                                <a th:href="@{/user/{id}/edit(id=${profileUser.id})}" class="px-3 py-1.5 bg-blue-600 text-white rounded-md text-sm font-medium 
+                                           hover:bg-blue-700 transition flex items-center gap-1 shadow-sm">
+                            
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                        </path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414
+                                               a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                     </svg>
-                                    Chỉnh sửa trang cá nhân
+                            
+                                    <span>Chỉnh sửa</span>
                                 </a>
                             </div>
-
+                
                             <!-- If other's profile -->
-                            <div th:unless="${currentUser != null and currentUser.id == profileUser.id}"
-                                class="flex gap-2">
+                            <div th:unless="${currentUser != null and currentUser.id == profileUser.id}" class="flex gap-2" id="friend-action-wrap">
                                 <button
-                                    class="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-smooth flex items-center gap-2">
+                                    class="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                     </svg>
                                     Thêm bạn bè
                                 </button>
-
+                
                                 <button
-                                    class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition-smooth flex items-center gap-2">
+                                    class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
@@ -131,9 +147,9 @@
                                     </svg>
                                     Nhắn tin
                                 </button>
-
+                
                                 <button
-                                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition-smooth">
+                                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z">
@@ -141,7 +157,7 @@
                                     </svg>
                                 </button>
                             </div>
-
+                
                         </div>
                     </div>
 
@@ -180,78 +196,55 @@
                 <!-- Left Column: About -->
                 <div class="lg:col-span-5">
                     <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
-                        <h2 class="font-bold text-xl mb-4">Giới thiệu</h2>
-
-                        <div class="space-y-3">
-                            <div class="flex items-center gap-3 text-gray-600">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
-                                    </path>
-                                </svg>
-                                <span class="text-sm">Làm việc tại <span class="font-medium text-gray-900">Công ty
-                                        ABC</span></span>
-                            </div>
-
-                            <div class="flex items-center gap-3 text-gray-600">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 14l9-5-9-5-9 5 9 5z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z">
-                                    </path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222">
-                                    </path>
-                                </svg>
-                                <span class="text-sm">Học tại <span class="font-medium text-gray-900">Đại học
-                                        XYZ</span></span>
-                            </div>
-
-                            <div class="flex items-center gap-3 text-gray-600">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
-                                    </path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                </svg>
-                                <span class="text-sm">Sống tại <span class="font-medium text-gray-900">Hà
-                                        Nội</span></span>
-                            </div>
-
-                            <div class="flex items-center gap-3 text-gray-600">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span class="text-sm">Tham gia <span class="font-medium text-gray-900">tháng 1 năm
-                                        2024</span></span>
-                            </div>
+                        <!-- BIO -->
+                         <div class="mb-4" >
+                        <h2 class="font-bold text-xl mb-2">Giới thiệu</h2>
+                        <p th:if="${profileUser.bio != null}" class="mt-2 text-gray-800 text-[15px] leading-snug whitespace-pre-line"
+                            th:text="${profileUser.bio}">
+                        </p>
+                        <p th:unless="${profileUser.bio != null}" class="mt-2 text-gray-500 text-sm">
+                            Chưa có giới thiệu nào.
+                        </p>
                         </div>
 
-                        <button
-                            class="w-full mt-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-smooth">
-                            Chỉnh sửa chi tiết
-                        </button>
+                        
                     </div>
 
                     <!-- Photos Section -->
                     <div class="bg-white rounded-lg shadow-sm p-4">
+                    
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="font-bold text-xl">Ảnh</h2>
-                            <a href="#" class="text-sm text-blue-600 hover:underline">Xem tất cả</a>
+                            <a th:href="@{/user/{id}/photos(id=${profileUser.id})}" class="text-sm text-blue-600 hover:underline">Xem tất
+                                cả</a>
                         </div>
-
-                        <div class="grid grid-cols-3 gap-2">
-                            <div class="aspect-square bg-gray-200 rounded-lg"></div>
-                            <div class="aspect-square bg-gray-200 rounded-lg"></div>
-                            <div class="aspect-square bg-gray-200 rounded-lg"></div>
-                            <div class="aspect-square bg-gray-200 rounded-lg"></div>
-                            <div class="aspect-square bg-gray-200 rounded-lg"></div>
-                            <div class="aspect-square bg-gray-200 rounded-lg"></div>
+                    
+                        <!-- Khi không có ảnh -->
+                        <div th:if="${#lists.isEmpty(images)}" class="text-gray-500 text-sm py-4 text-center">
+                            Chưa có ảnh nào
                         </div>
+                    
+                        <!-- Khi có ảnh -->
+                        <div th:unless="${#lists.isEmpty(images)}" class="grid grid-cols-3 gap-2">
+                    
+                            <!-- Lặp 6 ảnh đầu tiên -->
+                            <div th:each="img, iter : ${images}" th:if="${iter.index < 6}"
+                                class="relative aspect-square rounded-lg overflow-hidden bg-gray-200">
+                    
+                                <img th:src="@{'/uploads/' + ${img.imageUrl}}" class="w-full h-full object-cover">
+                    
+                                <!-- Nếu ảnh thứ 6 và tổng ảnh > 6 -> hiện overlay -->
+                                <div th:if="${iter.index == 5 and #lists.size(images) > 6}"
+                                    class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                    <span class="text-white text-xl font-semibold" th:text="'+' + (${#lists.size(images)} - 6)"></span>
+                                </div>
+                    
+                            </div>
+                    
+                        </div>
+                    
                     </div>
+
                 </div>
 
                 <!-- Right Column: Posts -->
@@ -261,8 +254,8 @@
                     <div th:if="${currentUser != null and currentUser.id == profileUser.id}"
                         class="bg-white rounded-lg shadow-sm p-4 mb-4">
                         <div class="flex gap-3">
-                            <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
-                                <img th:if="${profileUser.avatarUrl != null}" th:src="${profileUser.avatarUrl}"
+                            <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+                                <img th:if="${profileUser.avatarUrl != null}" th:src="@{'/uploads_avatar/' + ${profileUser.avatarUrl}}"
                                     class="w-full h-full object-cover">
                             </div>
                             <a href="/post/create"
@@ -286,15 +279,16 @@
                         </div>
 
                         <!-- Post Card -->
-                        <article th:each="post : ${posts}"
-                            class="bg-white rounded-lg shadow-sm hover:shadow-md transition-smooth cursor-pointer"
-                            th:onclick="'window.location.href=\'/post/' + ${post.id} + '\''">
+                        <article th:each="post : ${posts}" class="bg-white rounded-lg shadow-sm hover:shadow-md transition-smooth"
+                            th:attr="data-post-id=${post.id}, data-user-reaction=${userReactions.get(post.id)}">
+
+                            <div class="p-4 pb-3 cursor-pointer" th:onclick="'window.location.href=\'/post/' + '[[${post.id}]]' + '\''">
 
                             <!-- Post Header -->
                             <div class="p-4 pb-3">
                                 <div class="flex items-center gap-3 mb-3">
-                                    <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
-                                        <img th:if="${profileUser.avatarUrl != null}" th:src="${profileUser.avatarUrl}"
+                                    <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+                                        <img th:if="${profileUser.avatarUrl != null}" th:src="@{'/uploads_avatar/' + ${profileUser.avatarUrl}}"
                                             class="w-full h-full object-cover">
                                     </div>
                                     <div class="flex-1 min-w-0">
@@ -325,45 +319,63 @@
                                 <p class="text-gray-800 text-sm leading-relaxed mb-3" th:text="${post.content}"></p>
                             </div>
 
-                            <!-- Post Images -->
-                            <div th:if="${post.images != null and !#lists.isEmpty(post.images)}" class="relative bg-black" th:classappend="${#lists.size(post.images) == 1 ? '' : 
-                                                             (#lists.size(post.images) == 2 ? 'grid grid-cols-2' :
-                                                             (#lists.size(post.images) == 3 ? 'grid grid-cols-2' : 'grid grid-cols-2'))}">
+                            <!-- ============ HÌNH ẢNH ============ -->
+                            <div th:if="${post.images != null and !#lists.isEmpty(post.images)}" class="relative bg-black">
                             
                                 <!-- 1 ảnh: Full width -->
-                                <div th:if="${#lists.size(post.images) == 1}" th:each="img : ${post.images}">
-                                    <img th:src="@{'/uploads/' + ${img.imageUrl}}" alt="Post image"
-                                        class="w-full max-h-[600px] object-contain mx-auto">
+                                <div th:if="${#lists.size(post.images) == 1}">
+                                    <a th:href="@{/post/{id}(id=${post.id})}" class="block">
+                                        <img th:src="@{'/uploads/' + ${post.images[0].imageUrl}}" alt="Post image"
+                                            class="w-full max-h-[600px] object-contain mx-auto cursor-pointer hover:opacity-95 transition">
+                                    </a>
                                 </div>
                             
                                 <!-- 2 ảnh: Grid 2 cột -->
-                                <div th:if="${#lists.size(post.images) == 2}" th:each="img : ${post.images}"
-                                    class="relative overflow-hidden aspect-square">
-                                    <img th:src="@{'/uploads/' + ${img.imageUrl}}" alt="Post image" class="w-full h-full object-cover">
+                                <div th:if="${#lists.size(post.images) == 2}" class="grid grid-cols-2 gap-0.5">
+                                    <a th:each="img : ${post.images}" th:href="@{/post/{id}(id=${post.id})}"
+                                        class="relative overflow-hidden aspect-square block">
+                                        <img th:src="@{'/uploads/' + ${img.imageUrl}}" alt="Post image"
+                                            class="w-full h-full object-cover cursor-pointer hover:opacity-95 transition">
+                                    </a>
                                 </div>
                             
-                                <!-- 3 ảnh: 1 lớn + 2 nhỏ -->
-                                <div th:if="${#lists.size(post.images) == 3}">
-                                    <div th:each="img, iter : ${post.images}" class="relative overflow-hidden"
-                                        th:classappend="${iter.index == 0 ? 'row-span-2 aspect-[4/5]' : 'aspect-square'}">
-                                        <img th:src="@{'/uploads/' + ${img.imageUrl}}" alt="Post image" class="w-full h-full object-cover">
+                                <!-- 3 ảnh: 1 lớn bên trái + 2 nhỏ bên phải -->
+                                <div th:if="${#lists.size(post.images) == 3}" class="grid grid-cols-2 gap-0.5">
+                                    <!-- Ảnh đầu tiên chiếm full height bên trái -->
+                                    <a th:href="@{/post/{id}(id=${post.id})}" class="relative overflow-hidden row-span-2 block">
+                                        <img th:src="@{'/uploads/' + ${post.images[0].imageUrl}}" alt="Post image"
+                                            class="w-full h-full object-cover cursor-pointer hover:opacity-95 transition">
+                                    </a>
+                            
+                                    <!-- 2 ảnh còn lại xếp dọc bên phải -->
+                                    <div class="grid grid-rows-2 gap-0.5">
+                                        <a th:href="@{/post/{id}(id=${post.id})}" class="relative overflow-hidden block">
+                                            <img th:src="@{'/uploads/' + ${post.images[1].imageUrl}}" alt="Post image"
+                                                class="w-full h-full object-cover cursor-pointer hover:opacity-95 transition">
+                                        </a>
+                                        <a th:href="@{/post/{id}(id=${post.id})}" class="relative overflow-hidden block">
+                                            <img th:src="@{'/uploads/' + ${post.images[2].imageUrl}}" alt="Post image"
+                                                class="w-full h-full object-cover cursor-pointer hover:opacity-95 transition">
+                                        </a>
                                     </div>
                                 </div>
                             
                                 <!-- 4+ ảnh: Grid 2x2 -->
-                                <div th:if="${#lists.size(post.images) >= 4}">
-                                    <div th:each="img, iter : ${post.images}" th:if="${iter.index < 4}"
-                                        class="relative overflow-hidden aspect-square">
-                                        <img th:src="@{'/uploads/' + ${img.imageUrl}}" alt="Post image" class="w-full h-full object-cover">
+                                <div th:if="${#lists.size(post.images) >= 4}" class="grid grid-cols-2 gap-0.5">
+                                    <a th:each="img, iter : ${post.images}" th:if="${iter.index < 4}" th:href="@{/post/{id}(id=${post.id})}"
+                                        class="relative overflow-hidden aspect-square block">
+                                        <img th:src="@{'/uploads/' + ${img.imageUrl}}" alt="Post image"
+                                            class="w-full h-full object-cover cursor-pointer hover:opacity-95 transition">
                             
                                         <!-- Overlay nếu có nhiều hơn 4 ảnh -->
                                         <div th:if="${iter.index == 3 && #lists.size(post.images) > 4}"
-                                            class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center">
+                                            class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center pointer-events-none">
                                             <span class="text-white text-3xl font-semibold"
                                                 th:text="'+' + ${#lists.size(post.images) - 4}">+5</span>
                                         </div>
-                                    </div>
+                                    </a>
                                 </div>
+                            
                             </div>
 
                             <!-- Post Footer -->

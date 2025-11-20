@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layout/userbase :: layout(content=~{::content}, script=~{::script})}">
+
+<section th:fragment="content" class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow">
+
+    <h1 class="text-2xl font-bold mb-4">Cập nhật ảnh đại diện</h1>
+
+    <form th:action="@{/user/{id}/avatar(id=${user.id})}" method="post" enctype="multipart/form-data" class="space-y-4">
+
+        <div class="flex justify-center">
+            <img th:src="${user.avatarUrl}" class="w-40 h-40 rounded-full object-cover border shadow">
+        </div>
+
+        <div>
+            <label class="font-semibold">Chọn ảnh mới</label>
+            <input type="file" name="avatar" class="mt-2">
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+            Lưu ảnh đại diện
+        </button>
+
+    </form>
+
+</section>
+
+<section th:fragment="script"></section>
+
+</html>

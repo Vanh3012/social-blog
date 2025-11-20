@@ -19,12 +19,14 @@ com\socialblog\dto\PostDTO$PostDTOBuilder.class
 com\socialblog\dto\CommentDTO$CommentDTOBuilder.class
 com\socialblog\repository\CommentRepository.class
 com\socialblog\model\entity\ConversationMember$ConversationMemberBuilder.class
+com\socialblog\controller\FriendshipController.class
 com\socialblog\model\enums\FriendshipStatus.class
 com\socialblog\dto\PostDTO.class
 com\socialblog\dto\ReactionRequest.class
 com\socialblog\controller\CommentController.class
 com\socialblog\dto\PostRequest.class
 com\socialblog\model\entity\Comment$CommentBuilder.class
+com\socialblog\service\ProfileService.class
 com\socialblog\model\entity\Reaction$ReactionBuilder.class
 com\socialblog\repository\ReactionRepository.class
 com\socialblog\model\enums\ReactionType.class
@@ -58,6 +60,7 @@ com\socialblog\service\NotificationService.class
 com\socialblog\config\WebConfig.class
 com\socialblog\model\entity\Message$MessageBuilder.class
 com\socialblog\model\entity\PostImage$PostImageBuilder.class
+com\socialblog\service\FriendshipService.class
 com\socialblog\model\BaseEntity.class
 com\socialblog\model\enums\Gender.class
 com\socialblog\model\enums\Role.class

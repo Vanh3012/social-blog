@@ -1,31 +1,190 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:with="pageTitle='Sửa bài viết', content='this :: content'"
-    th:replace="~{layout/userbase :: layout(~{::content})}">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layout/userbase :: layout(~{::content}, ~{::script})}">
 
 <body>
-
     <section th:fragment="content">
 
-        <h1 class="text-xl font-semibold mb-4">Chỉnh sửa bài viết</h1>
+        <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden" x-data="{ 
+                images: [], 
+                files: [], 
+                deletedImageIds: [],
+                autoResize(el) { 
+                    el.style.height = 'auto'; 
+                    el.style.height = el.scrollHeight + 'px'; 
+                } 
+            }">
 
-        <form th:action="@{/post/{id}/edit(id=${postId})}" method="post" class="space-y-4">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h2 class="text-xl font-bold text-gray-800">Chỉnh sửa bài viết</h2>
+                <a th:href="@{/post/{id}(id=${post.id})}" class="text-gray-500 hover:text-gray-700 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </a>
+            </div>
 
-            <textarea name="content" rows="5" class="w-full border border-neutral-300 rounded-lg p-3"
-                th:text="${post.content}"></textarea>
+            <!-- Form -->
+            <form th:action="@{/post/{id}/edit(id=${post.id})}" method="post" enctype="multipart/form-data">
 
-            <select name="visibility" class="border rounded-lg px-3 py-2">
-                <option th:selected="${post.visibility == 'PUBLIC'}" value="PUBLIC">Công khai</option>
-                <option th:selected="${post.visibility == 'FRIENDS'}" value="FRIENDS">Bạn bè</option>
-                <option th:selected="${post.visibility == 'PRIVATE'}" value="PRIVATE">Chỉ mình tôi</option>
-            </select>
+                <!-- Content Area -->
+                <div class="px-6 pt-4">
+                    <textarea name="content" rows="4"
+                        class="w-full border-0 outline-none text-gray-800 text-lg resize-none placeholder-gray-400"
+                        placeholder="Bạn đang nghĩ gì?" @input="autoResize($event.target)"
+                        style="min-height: 100px; max-height: 400px; overflow-y: auto;"
+                        th:text="${post.content}"></textarea>
+                </div>
 
-            <button class="bg-neutral-900 text-white px-4 py-2 rounded-lg">
-                Cập nhật
-            </button>
-        </form>
+                <!-- Preview ảnh hiện có -->
+                <div class="px-6 mt-3" th:if="${post.images != null and !post.images.isEmpty()}">
+                    <div class="text-sm font-medium text-gray-600 mb-2">Ảnh hiện tại:</div>
+                    <div class="relative bg-gray-50 rounded-xl p-3 border border-gray-200"
+                        th:classappend="${post.images.size() == 1 ? '' : 'grid grid-cols-2 gap-2'}">
+
+                        <div th:each="img, iterStat : ${post.images}" th:id="'existing-img-' + ${img.id}"
+                            class="relative group overflow-hidden rounded-lg existing-image-wrapper"
+                            th:classappend="${post.images.size() == 1 ? 'max-h-96' : 'h-48'}"
+                            x-show="!deletedImageIds.includes([[${img.id}]])">
+
+                            <img th:src="@{/uploads/{filename}(filename=${img.imageUrl})}"
+                                class="existing-image w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                                th:classappend="${post.images.size() == 1 ? 'max-h-96' : ''}">
+
+                            <!-- Overlay khi hover -->
+                            <div
+                                class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200">
+                            </div>
+
+                            <!-- Nút xóa -->
+                            <button type="button" @click="deletedImageIds.push([[${img.id}]])" class="absolute top-2 right-2 w-8 h-8 bg-white text-gray-700 rounded-full shadow-lg
+                                       flex items-center justify-center opacity-0 group-hover:opacity-100 
+                                       transition-opacity duration-200 hover:bg-gray-100">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Hidden inputs cho các ảnh bị xóa -->
+                        <template x-for="imgId in deletedImageIds" :key="imgId">
+                            <input type="hidden" name="deleteImageIds" :value="imgId">
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Preview ảnh mới -->
+                <div class="px-6 mt-3" x-show="images.length > 0">
+                    <div class="text-sm font-medium text-gray-600 mb-2">Ảnh mới thêm:</div>
+                    <div class="relative bg-gray-50 rounded-xl p-3 border border-gray-200"
+                        :class="images.length === 1 ? '' : 'grid grid-cols-2 gap-2'">
+                        <template x-for="(img, i) in images" :key="i">
+                            <div class="relative group overflow-hidden rounded-lg"
+                                :class="images.length === 1 ? 'max-h-96' : 'h-48'">
+
+                                <img :src="img"
+                                    class="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                                    :class="images.length === 1 ? 'max-h-96' : ''">
+
+                                <!-- Overlay khi hover -->
+                                <div
+                                    class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200">
+                                </div>
+
+                                <!-- Nút xóa -->
+                                <button type="button" @click="images.splice(i,1)" class="absolute top-2 right-2 w-8 h-8 bg-white text-gray-700 rounded-full shadow-lg
+                                           flex items-center justify-center opacity-0 group-hover:opacity-100 
+                                           transition-opacity duration-200 hover:bg-gray-100">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div class="px-6 py-3 mt-2">
+                    <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-600">Thêm ảnh mới</span>
+
+                            <div class="flex items-center gap-1">
+                                <!-- Upload ảnh button -->
+                                <input type="file" x-ref="fileInput" name="images" multiple accept="image/*"
+                                    class="hidden" @change="
+                                        const newFiles = [...$refs.fileInput.files];
+                                        newFiles.forEach(file => {
+                                            const reader = new FileReader();
+                                            reader.onload = e => images.push(e.target.result);
+                                            reader.readAsDataURL(file);
+                                        });
+                                    ">
+
+                                <button type="button" @click="$refs.fileInput.click()"
+                                    class="p-2 rounded-lg hover:bg-gray-200 transition-colors group relative"
+                                    title="Ảnh/Video">
+                                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visibility Selector -->
+                <div class="px-6 pb-3">
+                    <select name="visibility" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-700 text-sm font-medium 
+                               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent 
+                               bg-white cursor-pointer hover:bg-gray-50 transition-colors">
+                        <option value="PUBLIC" th:selected="${post.visibility.name() == 'PUBLIC'}">🌍 Công khai</option>
+                        <option value="FRIENDS" th:selected="${post.visibility.name() == 'FRIENDS'}">👥 Bạn bè</option>
+                        <option value="PRIVATE" th:selected="${post.visibility.name() == 'PRIVATE'}">🔒 Chỉ mình tôi
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="px-6 pb-4 flex gap-3">
+                    <a th:href="@{/post/{id}(id=${post.id})}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 rounded-lg 
+                               text-center transition-all duration-200 shadow-sm hover:shadow-md">
+                        Hủy
+                    </a>
+                    <button type="submit"
+                        class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg 
+                               transition-all duration-200 shadow-sm hover:shadow-md active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Lưu thay đổi
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
 
     </section>
 
+    <!-- ===================== SCRIPTS ===================== -->
+    <section th:fragment="script">
+        <script src="/js/reactions.js"></script>
+        <script>
+            // Auto resize textarea on load
+            document.addEventListener('DOMContentLoaded', function () {
+                const textarea = document.querySelector('textarea[name="content"]');
+                if (textarea) {
+                    textarea.style.height = 'auto';
+                    textarea.style.height = textarea.scrollHeight + 'px';
+                }
+            });
+        </script>
+    </section>
 </body>
 
 </html>

@@ -4,9 +4,11 @@ import com.socialblog.dto.UserDTO;
 import com.socialblog.model.entity.Post;
 import com.socialblog.model.entity.Reaction;
 import com.socialblog.model.entity.User;
+import com.socialblog.model.entity.Friendship;
 import com.socialblog.repository.ReactionRepository;
 import com.socialblog.repository.UserRepository;
 import com.socialblog.service.PostService;
+import com.socialblog.service.FriendshipService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ public class HomeController {
     private final PostService postService;
     private final UserRepository userRepository;
     private final ReactionRepository reactionRepository;
+    private final FriendshipService friendshipService;
 
     @GetMapping("/")
     public String home(HttpSession session, Model model) {
@@ -34,6 +37,8 @@ public class HomeController {
 
         List<Post> posts;
         Map<Long, String> userReactions = new HashMap<>();
+        List<Friendship> pendingRequests = List.of();
+        List<User> friendSuggestions = List.of();
 
         if (currentUserDTO != null) {
 
@@ -51,6 +56,8 @@ public class HomeController {
 
                             });
                 }
+                pendingRequests = friendshipService.listPendingReceived(currentUserDTO.getId());
+                friendSuggestions = friendshipService.suggestFriends(currentUserDTO.getId(), 5);
             }
 
         } else {
@@ -62,6 +69,8 @@ public class HomeController {
         model.addAttribute("posts", posts);
         model.addAttribute("userReactions", userReactions);
         model.addAttribute("currentUser", currentUserDTO);
+        model.addAttribute("pendingFriendRequests", pendingRequests);
+        model.addAttribute("friendSuggestions", friendSuggestions);
 
         return "Post/home";
     }

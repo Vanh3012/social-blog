@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.transaction.Transactional;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 @Slf4j
 public class PostService {
 
@@ -93,4 +95,57 @@ public class PostService {
         return postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết"));
     }
+
+    // ====================== CẬP NHẬT BÀI VIẾT ======================
+    public void updatePost(Long postId, Long userId, String content, Visibility visibility,
+            List<MultipartFile> images) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        // Check quyền
+        if (!post.getAuthor().getId().equals(userId)) {
+            throw new RuntimeException("No permission");
+        }
+
+        // Update nội dung
+        post.setContent(content);
+        post.setVisibility(visibility);
+
+        // Xử lý ảnh mới
+        if (images != null && images.stream().anyMatch(f -> !f.isEmpty())) {
+
+            // Xóa ảnh cũ
+            postImageRepository.deleteByPost(post);
+
+            // Upload ảnh mới
+            for (MultipartFile file : images) {
+                if (!file.isEmpty()) {
+                    String fileName = saveFile(file);
+
+                    PostImage img = PostImage.builder()
+                            .post(post)
+                            .imageUrl(fileName)
+                            .build();
+
+                    postImageRepository.save(img);
+                }
+            }
+        }
+
+        postRepository.save(post);
+    }
+
+    // ====================== XÓA BÀI VIẾT ======================
+    public void deletePost(Long postId, Long userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        if (!post.getAuthor().getId().equals(userId)) {
+            throw new RuntimeException("No permission");
+        }
+
+        postRepository.delete(post);
+    }
+
 }

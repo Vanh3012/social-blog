@@ -15,6 +15,8 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 
     Optional<Friendship> findBySenderAndReceiver(User sender, User receiver);
 
+    List<Friendship> findByReceiverAndStatus(User receiver, FriendshipStatus status);
+
     boolean existsBySenderAndReceiverAndStatus(
             User sender,
             User receiver,
@@ -26,4 +28,11 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
             AND f.status = com.socialblog.model.enums.FriendshipStatus.ACCEPTED
             """)
     List<Friendship> findAcceptedFriends(@Param("userId") Long userId);
+
+    @Query("""
+            SELECT f FROM Friendship f
+            WHERE (f.sender.id = :user1 AND f.receiver.id = :user2)
+            OR (f.sender.id = :user2 AND f.receiver.id = :user1)
+            """)
+    Optional<Friendship> findBetween(@Param("user1") Long user1, @Param("user2") Long user2);
 }

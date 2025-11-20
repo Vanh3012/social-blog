@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" 
+        th:replace="~{layout/userbase :: layout(
+                        content = ~{::content},
+                        script  = ~{::script}
+                    )}">
+
+<body>
+
+    <section th:fragment="content">
+
+        <div class="max-w-5xl mx-auto">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6 mt-4">
+                <h1 class="text-2xl font-bold" th:text="'Ảnh của ' + ${profileUser.fullName}"></h1>
+
+                <a th:href="@{/user/{id}(id=${profileUser.id})}"
+                    class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                    Quay lại trang cá nhân
+                </a>
+            </div>
+
+            <!-- PHOTO GRID -->
+            <div th:if="${#lists.isEmpty(images)}" class="text-center bg-white py-16 rounded-lg shadow">
+                <p class="text-gray-500">Chưa có ảnh nào.</p>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(images)}" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+
+                <div th:each="img : ${images}" class="relative h-40 rounded-lg overflow-hidden bg-gray-200 cursor-pointer"
+                    th:data-full="@{'/uploads/' + ${img.imageUrl}}"
+                    th:data-author="${img.post.author.fullName}"
+                    th:data-date="${#temporals.format(img.post.createdAt, 'dd/MM/yyyy HH:mm')}"
+                    th:data-content="${#strings.abbreviate(img.post.content, 200)}"
+                    th:data-post-id="${img.post.id}">
+                    <img th:src="@{'/uploads/' + ${img.imageUrl}}" class="w-full h-full object-cover" alt="">
+                </div>
+
+            </div>
+
+            <!-- Lightbox overlay -->
+            <div id="lightbox" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4">
+                <button id="lightbox-close" class="absolute top-4 right-4 text-white text-3xl leading-none">&times;</button>
+                <button id="lightbox-prev" class="absolute left-4 text-white text-3xl leading-none px-3 py-2 bg-black/40 rounded-full hover:bg-black/60">&lsaquo;</button>
+
+                <div class="w-full max-w-6xl flex flex-col md:flex-row items-center gap-6">
+                    <div class="flex-1 flex items-center justify-center">
+                        <img id="lightbox-img" src="" alt="" class="max-h-[70vh] max-w-full rounded-lg shadow-2xl">
+                    </div>
+                    <div id="lightbox-meta" class="w-full md:w-72 text-white space-y-2 bg-white/5 p-4 rounded-lg backdrop-blur">
+                        <p id="lightbox-author" class="text-lg font-semibold"></p>
+                        <p id="lightbox-date" class="text-sm text-gray-200"></p>
+                        <p id="lightbox-content" class="text-sm text-gray-100 whitespace-pre-line break-words"></p>
+                        <a id="lightbox-link" href="#" class="inline-block mt-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm font-semibold transition">Xem bài viết</a>
+                    </div>
+                </div>
+
+                <button id="lightbox-next" class="absolute right-4 text-white text-3xl leading-none px-3 py-2 bg-black/40 rounded-full hover:bg-black/60">&rsaquo;</button>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section th:fragment="script" >
+        <script>
+            (() => {
+                const lightbox = document.getElementById('lightbox');
+                const lightboxImg = document.getElementById('lightbox-img');
+                const lightboxClose = document.getElementById('lightbox-close');
+                const lightboxPrev = document.getElementById('lightbox-prev');
+                const lightboxNext = document.getElementById('lightbox-next');
+                const authorEl = document.getElementById('lightbox-author');
+                const dateEl = document.getElementById('lightbox-date');
+                const contentEl = document.getElementById('lightbox-content');
+                const linkEl = document.getElementById('lightbox-link');
+                const cards = Array.from(document.querySelectorAll('[data-full]'));
+                let currentIndex = -1;
+
+                const showAt = (index) => {
+                    if (index < 0 || index >= cards.length) return;
+                    currentIndex = index;
+                    const card = cards[currentIndex].dataset;
+                    lightboxImg.src = card.full;
+                    authorEl.textContent = card.author || '';
+                    dateEl.textContent = card.date || '';
+                    contentEl.textContent = card.content || '';
+                    if (card.postId) {
+                        linkEl.href = `/post/${card.postId}`;
+                        linkEl.classList.remove('pointer-events-none', 'opacity-50');
+                    } else {
+                        linkEl.removeAttribute('href');
+                        linkEl.classList.add('pointer-events-none', 'opacity-50');
+                    }
+                    lightbox.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                };
+
+                const closeLightbox = () => {
+                    lightbox.classList.add('hidden');
+                    lightboxImg.src = '';
+                    document.body.style.overflow = '';
+                };
+
+                const next = () => {
+                    if (!cards.length) return;
+                    showAt((currentIndex + 1) % cards.length);
+                };
+
+                const prev = () => {
+                    if (!cards.length) return;
+                    showAt((currentIndex - 1 + cards.length) % cards.length);
+                };
+
+                cards.forEach((card, idx) => {
+                    card.addEventListener('click', () => showAt(idx));
+                });
+
+                lightbox.addEventListener('click', (e) => {
+                    if (e.target === lightbox) closeLightbox();
+                });
+                lightboxClose.addEventListener('click', closeLightbox);
+                lightboxNext.addEventListener('click', (e) => { e.stopPropagation(); next(); });
+                lightboxPrev.addEventListener('click', (e) => { e.stopPropagation(); prev(); });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && !lightbox.classList.contains('hidden')) closeLightbox();
+                    if (e.key === 'ArrowRight' && !lightbox.classList.contains('hidden')) next();
+                    if (e.key === 'ArrowLeft' && !lightbox.classList.contains('hidden')) prev();
+                });
+            })();
+        </script>
+    </section>
+
+</body>
+
+</html>

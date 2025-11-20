@@ -1,6 +1,7 @@
 package com.socialblog.repository;
 
 import com.socialblog.model.entity.Post;
+import com.socialblog.model.entity.PostImage;
 import com.socialblog.model.entity.User;
 import com.socialblog.model.enums.Visibility;
 import org.springframework.data.jpa.repository.JpaRepository;

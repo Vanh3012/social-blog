@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layout/userbase :: layout(content=~{::content}, script=~{::script})}">
+
+<section th:fragment="content" class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow">
+
+    <h1 class="text-2xl font-bold mb-4">Chỉnh sửa trang cá nhân</h1>
+
+    <form th:action="@{/user/{id}/update(id=${user.id})}" method="post" class="space-y-4">
+
+        <!-- Fullname -->
+        <div>
+            <label class="font-semibold">Họ và tên</label>
+            <input type="text" name="fullName" th:value="${user.fullName}" class="w-full px-3 py-2 border rounded">
+        </div>
+
+        <!-- Bio -->
+        <div>
+            <label class="font-semibold">Giới thiệu</label>
+            <textarea name="bio" rows="3" class="w-full px-3 py-2 border rounded" th:text="${user.bio}"></textarea>
+        </div>
+
+        <!-- Address -->
+        <div>
+            <label class="font-semibold">Địa chỉ</label>
+            <input type="text" name="address" th:value="${user.address}" class="w-full px-3 py-2 border rounded">
+        </div>
+
+        <!-- Date of birth -->
+        <div>
+            <label class="font-semibold">Ngày sinh</label>
+            <input type="date" name="dob"
+                th:value="${user.dateOfBirth != null ? #temporals.format(user.dateOfBirth, 'yyyy-MM-dd') : ''}"
+                class="w-full px-3 py-2 border rounded">
+        </div>
+
+        <!-- Gender -->
+        <div>
+            <label class="font-semibold">Giới tính</label>
+            <select name="gender" class="w-full px-3 py-2 border rounded">
+                <option value="">-- Chọn giới tính --</option>
+        
+                <option value="MALE" th:selected="${user.gender != null and user.gender.name() == 'MALE'}">
+                    Nam
+                </option>
+        
+                <option value="FEMALE" th:selected="${user.gender != null and user.gender.name() == 'FEMALE'}">
+                    Nữ
+                </option>
+        
+                <option value="OTHER" th:selected="${user.gender != null and user.gender.name() == 'OTHER'}">
+                    Khác
+                </option>
+            </select>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+            Lưu thay đổi
+        </button>
+
+    </form>
+
+</section>
+
+<section th:fragment="script"></section>
+
+</html>

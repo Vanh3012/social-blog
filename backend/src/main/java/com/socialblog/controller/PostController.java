@@ -12,6 +12,9 @@ import com.socialblog.service.ReactionService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -108,5 +111,69 @@ public class PostController {
 
             return "redirect:/";
         }
+    }
+
+    @GetMapping("/{id}/edit")
+    public String editPost(@PathVariable Long id,
+            HttpSession session,
+            Model model,
+            RedirectAttributes ra) {
+        UserDTO currentUser = (UserDTO) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            ra.addFlashAttribute("error", "Bạn cần đăng nhập để chỉnh sửa");
+            return "redirect:/auth/login";
+        }
+
+        Post post = postService.getPostById(id);
+        if (!post.getAuthor().getId().equals(currentUser.getId())) {
+            ra.addFlashAttribute("error", "Bạn không có quyền chỉnh sửa bài viết này");
+            return "redirect:/";
+        }
+        model.addAttribute("post", post);
+        return "Post/edit";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String updatePost(@PathVariable Long id,
+            @RequestParam("content") String content,
+            @RequestParam("visibility") Visibility visibility,
+            @RequestParam(value = "images", required = false) List<MultipartFile> images,
+            HttpSession session,
+            RedirectAttributes ra) {
+
+        UserDTO currentUser = (UserDTO) session.getAttribute("currentUser");
+
+        if (currentUser == null) {
+            ra.addFlashAttribute("error", "Bạn cần đăng nhập");
+            return "redirect:/auth/login";
+        }
+
+        postService.updatePost(id, currentUser.getId(), content, visibility, images);
+
+        ra.addFlashAttribute("success", "Cập nhật bài viết thành công");
+        return "redirect:/post/" + id;
+    }
+
+    @PostMapping("/{id}/delete")
+    public String deletePost(@PathVariable Long id,
+            HttpSession session,
+            RedirectAttributes ra) {
+
+        UserDTO currentUser = (UserDTO) session.getAttribute("currentUser");
+
+        if (currentUser == null) {
+            ra.addFlashAttribute("error", "Bạn cần đăng nhập");
+            return "redirect:/auth/login";
+        }
+
+        Post post = postService.getPostById(id);
+        if (!post.getAuthor().getId().equals(currentUser.getId())) {
+            ra.addFlashAttribute("error", "Bạn không có quyền xóa bài viết này");
+            return "redirect:/";
+        }
+
+        postService.deletePost(id, currentUser.getId());
+        ra.addFlashAttribute("success", "Xóa bài viết thành công");
+        return "redirect:/";
     }
 }

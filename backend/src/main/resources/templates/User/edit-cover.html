@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layout/userbase :: layout(content=~{::content}, script=~{::script})}">
+
+<section th:fragment="content" class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow">
+
+    <h1 class="text-2xl font-bold mb-4">Cập nhật ảnh bìa</h1>
+
+    <div class="w-full h-48 overflow-hidden rounded-lg border">
+        <img th:src="${user.coverUrl}" class="w-full h-full object-cover">
+    </div>
+
+    <form th:action="@{/user/{id}/cover(id=${user.id})}" method="post" enctype="multipart/form-data"
+        class="space-y-4 mt-4">
+
+        <div>
+            <label class="font-semibold">Chọn ảnh bìa mới</label>
+            <input type="file" name="cover" class="mt-2">
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+            Lưu ảnh bìa
+        </button>
+
+    </form>
+
+</section>
+
+<section th:fragment="script"></section>
+
+</html>

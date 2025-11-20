@@ -1,5 +1,5 @@
 package com.socialblog.model.enums;
 
 public enum FriendshipStatus {
-    PENDING, ACCEPTED, DECLINED, BLOCKED
+    NONE, PENDING, ACCEPTED, DECLINED, BLOCKED
 }

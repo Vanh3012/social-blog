@@ -8,11 +8,13 @@ import com.socialblog.repository.CommentRepository;
 import com.socialblog.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CommentService {
 
     private final CommentRepository commentRepository;
@@ -49,5 +51,26 @@ public class CommentService {
     // ====================== LẤY DANH SÁCH COMMENT ======================
     public List<Comment> getCommentsOfPost(Long postId) {
         return commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
+    }
+
+    public void deleteComment(Long commentId, Long currentUserId) {
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận"));
+
+        Post post = comment.getPost();
+
+        // chỉ người viết comment hoặc chủ bài viết được xóa
+        if (!comment.getAuthor().getId().equals(currentUserId)
+                && !post.getAuthor().getId().equals(currentUserId)) {
+            throw new RuntimeException("Bạn không có quyền xóa bình luận này");
+        }
+
+        // Nếu là comment cha → xoá replies luôn
+        if (!comment.getReplies().isEmpty()) {
+            comment.getReplies().forEach(reply -> commentRepository.delete(reply));
+        }
+
+        commentRepository.delete(comment);
     }
 }
