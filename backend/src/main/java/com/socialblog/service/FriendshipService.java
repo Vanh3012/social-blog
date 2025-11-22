@@ -130,6 +130,15 @@ public class FriendshipService {
                 .toList();
     }
 
+    public void unfriend(Long userId, Long otherUserId) {
+        Friendship friendship = friendshipRepository.findBetween(userId, otherUserId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy quan hệ bạn bè"));
+        if (friendship.getStatus() != FriendshipStatus.ACCEPTED) {
+            throw new RuntimeException("Chỉ hủy khi đang là bạn bè");
+        }
+        friendshipRepository.delete(friendship);
+    }
+
 public List<User> suggestFriends(Long userId, int limit) {
         User me = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));

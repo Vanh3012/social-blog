@@ -144,7 +144,14 @@
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open"
                         class="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full hover:bg-gray-200 transition-smooth">
-                        <svg class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                        <span th:if="${currentUser != null and currentUser.avatarUrl != null}" class="w-10 h-10 rounded-full overflow-hidden block">
+                            <img th:src="@{'/uploads_avatar/' + ${currentUser.avatarUrl}}"
+                                alt="Avatar" class="w-full h-full object-cover">
+                        </span>
+                        <span th:if="${currentUser != null and currentUser.avatarUrl == null}" class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-semibold">
+                            <span th:text="${#strings.substring(currentUser.fullName,0,1).toUpperCase()}">U</span>
+                        </span>
+                        <svg th:unless="${currentUser != null}" class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                                 clip-rule="evenodd"></path>
                         </svg>

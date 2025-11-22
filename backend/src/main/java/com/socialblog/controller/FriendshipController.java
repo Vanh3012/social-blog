@@ -52,6 +52,14 @@ public class FriendshipController {
         return ResponseEntity.ok(success("Đã hủy lời mời", null));
     }
 
+    // ===================== UNFRIEND =====================
+    @PostMapping("/unfriend/{otherUserId}")
+    public ResponseEntity<?> unfriend(@PathVariable Long otherUserId, HttpSession session) {
+        Long uid = requireLogin(session);
+        friendshipService.unfriend(uid, otherUserId);
+        return ResponseEntity.ok(success("Đã hủy kết bạn", null));
+    }
+
     // ===================== UTIL =====================
     private Long requireLogin(HttpSession session) {
         UserDTO user = (UserDTO) session.getAttribute("currentUser");

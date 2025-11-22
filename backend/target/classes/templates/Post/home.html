@@ -263,13 +263,9 @@
                 <!-- Reaction + Comment Count -->
                 <div class="flex items-center justify-between px-2 py-2 text-sm text-gray-600">
                     <div class="flex items-center gap-1">
-                        <div class="flex -space-x-1">
-                            <div
-                                class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center border-2 border-white">
-                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                                </svg>
+                        <div class="flex -space-x-1" th:if="${topReactions[post.id] != null}">
+                            <div th:each="rc : ${topReactions[post.id]}" class="w-5 h-5 rounded-full bg-white border-2 border-white">
+                                <img th:src="@{'/reactions/' + ${#strings.toLowerCase(rc.type.name())} + '.png'}" class="w-full h-full object-contain">
                             </div>
                         </div>
                         <span class="like-count" th:text="${post.likeCount}">0</span>
@@ -636,46 +632,46 @@
             }
 
             // Report Modal
-            let reportPostId = null;
+                let reportPostId = null;
 
-            function openReportModal(postId) {
-                reportPostId = postId;
-                document.getElementById('reportModal').classList.remove('hidden');
-                document.getElementById('reportModal').classList.add('flex');
-            }
-
-            function closeReportModal() {
-                document.getElementById('reportModal').classList.add('hidden');
-                document.getElementById('reportModal').classList.remove('flex');
-                document.getElementById('reportForm').reset();
-            }
-
-            async function submitReport(event) {
-                event.preventDefault();
-
-                const reason = document.querySelector('input[name="reason"]:checked').value;
-
-                try {
-                    const response = await fetch(`/post/${reportPostId}/report`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: `reason=${encodeURIComponent(reason)}`
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        alert(result.message);
-                        closeReportModal();
-                    } else {
-                        alert(result.message);
-                    }
-                } catch (error) {
-                    alert('Có lỗi xảy ra, vui lòng thử lại');
+                function openReportModal(postId) {
+                    reportPostId = postId;
+                    document.getElementById('reportModal').classList.remove('hidden');
+                    document.getElementById('reportModal').classList.add('flex');
                 }
-            }
+
+                function closeReportModal() {
+                    document.getElementById('reportModal').classList.add('hidden');
+                    document.getElementById('reportModal').classList.remove('flex');
+                    document.getElementById('reportForm').reset();
+                }
+
+                async function submitReport(event) {
+                    event.preventDefault();
+
+                    const reason = document.querySelector('input[name="reason"]:checked').value;
+
+                    try {
+                        const response = await fetch(`/api/post/${reportPostId}/report`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: `reason=${encodeURIComponent(reason)}`
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            alert(result.message);
+                            closeReportModal();
+                        } else {
+                            alert(result.message);
+                        }
+                    } catch (error) {
+                        alert('Có lỗi xảy ra, vui lòng thử lại');
+                    }
+                }
     </script>
 </section>
 

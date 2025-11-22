@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.socialblog.model.enums.Role;
 
 @Controller
 @RequestMapping("/auth")
@@ -57,6 +58,9 @@ public class AuthController {
             session.setAttribute("userId", user.getId());
             session.setAttribute("username", user.getUsername());
 
+            if (user.getRole() == Role.ADMIN) {
+                return "redirect:/admin/dashboard";
+            }
             return "redirect:/";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());

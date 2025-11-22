@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layout/userbase :: layout(content=~{::content}, script=~{::script})}">
+
+<body>
+    <section th:fragment="content">
+        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-sm p-6 space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-16 h-16 rounded-full overflow-hidden bg-gray-200">
+                    <img th:if="${profileUser.avatarUrl != null}" th:src="@{'/uploads_avatar/' + ${profileUser.avatarUrl}}"
+                        class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold" th:text="${profileUser.fullName}">Tên</h1>
+                    <p class="text-gray-500" th:text="'@' + ${profileUser.username}">@username</p>
+                </div>
+            </div>
+
+            <div class="space-y-2 text-sm text-gray-800">
+                <div>
+                    <span class="font-semibold">Giới thiệu: </span>
+                    <span th:text="${profileUser.bio} ?: 'Chưa có giới thiệu'"></span>
+                </div>
+                <div th:if="${profileUser.address}">
+                    <span class="font-semibold">Địa chỉ: </span>
+                    <span th:text="${profileUser.address}"></span>
+                </div>
+                <div th:if="${profileUser.dateOfBirth}">
+                    <span class="font-semibold">Ngày sinh: </span>
+                    <span th:text="${#temporals.format(profileUser.dateOfBirth, 'dd/MM/yyyy')}"></span>
+                </div>
+                <div th:if="${profileUser.gender}">
+                    <span class="font-semibold">Giới tính: </span>
+                    <span th:text="${profileUser.gender}"></span>
+                </div>
+                <div>
+                    <span class="font-semibold">Email: </span>
+                    <span th:text="${profileUser.email}"></span>
+                </div>
+                <!-- Không hiển thị số điện thoại để giữ private -->
+            </div>
+
+            <div>
+                <a th:href="@{/user/{id}(id=${profileUser.id})}" class="text-blue-600 hover:underline text-sm">Quay lại trang cá nhân</a>
+            </div>
+        </div>
+    </section>
+
+    <section th:fragment="script"></section>
+</body>
+
+</html>

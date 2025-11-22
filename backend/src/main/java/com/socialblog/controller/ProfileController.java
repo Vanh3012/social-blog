@@ -25,6 +25,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.socialblog.service.ProfileService;
 import com.socialblog.repository.PostImageRepository;
 import com.socialblog.service.FriendshipService;
+import com.socialblog.service.ReactionService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ public class ProfileController {
     private final PostImageRepository postImageRepository;
     private final ReactionRepository reactionRepository;
     private final FriendshipService friendshipService;
+    private final ReactionService reactionService;
 
     // ====================== XEM PROFILE USER ======================
     @GetMapping("/user/{id}")
@@ -80,6 +82,7 @@ public class ProfileController {
 
         // Lấy reaction của current user cho từng post
         Map<Long, String> userReactions = new HashMap<>();
+        Map<Long, java.util.List<com.socialblog.service.ReactionService.ReactionCount>> topReactions = new HashMap<>();
 
         if (currentUserDTO != null) {
             User currentUser = userRepository.findById(currentUserDTO.getId())
@@ -89,6 +92,7 @@ public class ProfileController {
                 for (Post post : posts) {
                     reactionRepository.findByPostAndUser(post, currentUser)
                             .ifPresent(reaction -> userReactions.put(post.getId(), reaction.getType().name()));
+                    topReactions.put(post.getId(), reactionService.topReactions(post, 3));
                 }
 
                 Friendship friendship = friendshipService.findBetween(currentUserDTO.getId(), profileUser.getId())
@@ -104,7 +108,12 @@ public class ProfileController {
             }
         }
         friends = friendshipService.listFriends(profileUser.getId());
+        // Top reactions cho mọi post
+        for (Post p : posts) {
+            topReactions.putIfAbsent(p.getId(), reactionService.topReactions(p, 3));
+        }
         model.addAttribute("userReactions", userReactions);
+        model.addAttribute("topReactions", topReactions);
         model.addAttribute("profileUser", profileUser);
         model.addAttribute("posts", posts);
         model.addAttribute("currentUser", currentUserDTO);
@@ -117,6 +126,19 @@ public class ProfileController {
         model.addAttribute("friends", friends);
 
         return "User/profile";
+    }
+
+    // =================== TRANG GIỚI THIỆU ===================
+    @GetMapping("/user/{id}/about")
+    public String viewUserAbout(@PathVariable Long id, Model model, HttpSession session) {
+        User profileUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserDTO currentUser = (UserDTO) session.getAttribute("currentUser");
+
+        model.addAttribute("profileUser", profileUser);
+        model.addAttribute("currentUser", currentUser);
+        return "User/about";
     }
 
     // =================== TRANG XEM TẤT CẢ ẢNH ===================
@@ -162,6 +184,7 @@ public class ProfileController {
             @RequestParam(required = false) String address,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dob,
             @RequestParam(required = false) String gender,
+            @RequestParam(required = false) String phoneNumber,
             HttpSession session,
             RedirectAttributes ra) {
 
@@ -172,7 +195,7 @@ public class ProfileController {
 
         User user = userRepository.findById(id).orElseThrow();
 
-        profileService.updateUserInfo(user, fullName, bio, address, dob, gender);
+        profileService.updateUserInfo(user, fullName, bio, address, dob, gender, phoneNumber);
 
         ra.addFlashAttribute("success", "Cập nhật thông tin thành công!");
         return "redirect:/user/" + id;

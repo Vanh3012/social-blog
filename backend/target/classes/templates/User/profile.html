@@ -109,7 +109,7 @@
 
                             <div th:unless="${currentUser != null and currentUser.id == profileUser.id}" class="flex gap-2 flex-wrap" id="friend-action-wrap">
                                 <div th:if="${currentUser == null}">
-                                    <a href="/login"
+                                    <a th:href="@{/login}"
                                         class="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition flex items-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -122,13 +122,17 @@
                                     th:attr="data-profile-id=${profileUser.id},data-friendship-id=${friendshipId}">
                                     <div th:switch="${friendshipStatus}">
                                         <div th:case="'ACCEPTED'">
-                                            <button class="px-5 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold flex items-center gap-2" disabled>
+                                            <button type="button"
+                                                class="px-5 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold flex items-center gap-2"
+                                                th:onclick="|openUnfriendModal(${profileUser.id})|">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                                 </svg>
-                                                Đã là bạn bè
+                                                Friend
                                             </button>
                                         </div>
+                            
+
                                         <div th:case="'PENDING'">
                                             <div th:if="${isRequestSender}" class="flex gap-2 flex-wrap items-center">
                                                 <button class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold flex items-center gap-2" disabled>
@@ -194,25 +198,21 @@
                         </div>
                     </div>
 
+                    
                     <!-- Tabs -->
-                    <div class="mt-4 border-t border-gray-200">
-                        <div class="flex gap-1 overflow-x-auto">
-                            <button class="px-5 py-3 text-sm font-semibold text-blue-600 border-b-2 border-blue-600 whitespace-nowrap">
-                                Bài viết
-                            </button>
-                            <button class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">
-                                Giới thiệu
-                            </button>
-                            <button class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">
-                                Bạn bè
-                            </button>
-                            <button class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">
-                                Ảnh
-                            </button>
-                            <button class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">
-                                Video
-                            </button>
-                        </div>
+                    <div class="flex gap-1 overflow-x-auto">
+                        <a th:href="@{/user/{id}(id=${profileUser.id})}"
+                            class="px-5 py-3 text-sm font-semibold text-blue-600 border-b-2 border-blue-600 whitespace-nowrap">Bài viết</a>
+                        <a th:href="@{/user/{id}/about(id=${profileUser.id})}"
+                            class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">Giới
+                            thiệu</a>
+                        <button
+                            class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">Bạn
+                            bè</button>
+                        <button 
+                            class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth"><a th:href="@{/user/{id}/photos(id=${profileUser.id})}">Ảnh</a></button>
+                        <button
+                            class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">Video</button>
                     </div>
                 </div>
             </div>
@@ -588,12 +588,9 @@
                                 <!-- Reaction + Comment Count -->
                                 <div class="flex items-center justify-between px-2 py-2 text-sm text-gray-600">
                                     <div class="flex items-center gap-1">
-                                        <div class="flex -space-x-1">
-                                            <div class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center border-2 border-white">
-                                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path
-                                                        d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                                                </svg>
+                                        <div class="flex -space-x-1" th:if="${topReactions[post.id] != null}">
+                                            <div th:each="rc : ${topReactions[post.id]}" class="w-5 h-5 rounded-full bg-white border-2 border-white">
+                                                <img th:src="@{'/reactions/' + ${#strings.toLowerCase(rc.type.name())} + '.png'}" class="w-full h-full object-contain">
                                             </div>
                                         </div>
                                         <span class="like-count" th:text="${post.likeCount}">0</span>
@@ -700,10 +697,28 @@
                 </div>
             </div>
         </div>
+        <!-- Unfriend Modal-->
+        <div id="unfriendModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-sm shadow-xl">
+                <h2 class="text-xl font-semibold mb-4">Hủy kết bạn</h2>
+                <p class="text-gray-600 mb-6">Bạn có chắc muốn hủy kết bạn với người này?</p>
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeUnfriendModal()"
+                        class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">Hủy</button>
+                    <button type="button" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+                    onclick="friendAction('unfriend', unfriendTargetId)">
+                    Hủy kết bạn
+                </button>
+            </div>
+        </div>
+    </div>
     </section>
+   
+
 <!-- ====================== SCRIPT ====================== -->
 <section th:fragment="script">
     <script>
+        // Friend Actions: request, accept, decline, cancel, unfriend
         function friendAction(action, targetId) {
             let url = '';
             switch (action) {
@@ -719,6 +734,9 @@
                 case 'cancel':
                     url = `/friend/${targetId}/cancel`;
                     break;
+                case 'unfriend':
+                    url = `/friend/unfriend/${targetId}`;
+                    break;
                 default:
                     return;
             }
@@ -732,7 +750,21 @@
                     }
                 })
                 .catch(() => alert('Vui long dang nhap'));
+        } 
+        // Unfriend Modal
+        function openUnfriendModal() { 
+            document.getElementById('unfriendModal')
+            .classList.remove('hidden');
+             document.getElementById('unfriendModal')
+             .classList.add('flex'); 
+            }
+        function closeUnfriendModal() {
+             document.getElementById('unfriendModal')
+             .classList.add('hidden');
+            document.getElementById('unfriendModal').
+            classList.remove('flex'); 
         }
+
 
         let hideTimeout = null;
 
@@ -886,6 +918,7 @@
 
             // Delete Modal
             let deletePostId = null;
+            let unfriendTargetId = null;
 
             function openDeleteModal(postId) {
                 deletePostId = postId;
@@ -897,6 +930,24 @@
             function closeDeleteModal() {
                 document.getElementById('deleteModal').classList.add('hidden');
                 document.getElementById('deleteModal').classList.remove('flex');
+            }
+
+            // Unfriend modal
+            function openUnfriendModal(profileId) {
+                unfriendTargetId = profileId;
+                const modal = document.getElementById('unfriendModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+            }
+            function closeUnfriendModal() {
+                const modal = document.getElementById('unfriendModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    unfriendTargetId = null;
+                }
             }
 
             // Report Modal
@@ -914,6 +965,7 @@
                 document.getElementById('reportForm').reset();
             }
     </script>
+    
  </section>
     
  </body>

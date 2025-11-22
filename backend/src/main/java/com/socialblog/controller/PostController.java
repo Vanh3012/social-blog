@@ -95,6 +95,7 @@ public class PostController {
                     userReaction = reactionService.getUserReactionForPost(id, userEntity);
                 }
             }
+            model.addAttribute("topReactions", reactionService.topReactions(post, 3));
             model.addAttribute("userReaction", userReaction);
             model.addAttribute("newComment", new CommentRequest());
             return "Post/detail"; // sẽ chứa comment + reaction luôn

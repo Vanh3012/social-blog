@@ -51,12 +51,13 @@ public class ProfileService {
 
     // =================== UPDATE INFO ===================
     public void updateUserInfo(User user, String fullName, String bio, String address,
-            LocalDate dob, String gender) {
+            LocalDate dob, String gender, String phoneNumber) {
 
         user.setFullName(fullName);
         user.setBio(bio);
         user.setAddress(address);
         user.setDateOfBirth(dob);
+        user.setPhoneNumber(phoneNumber);
 
         if (gender != null && !gender.isEmpty()) {
             user.setGender(Enum.valueOf(com.socialblog.model.enums.Gender.class, gender));

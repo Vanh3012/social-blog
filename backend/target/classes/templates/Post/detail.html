@@ -117,7 +117,7 @@
                     <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
                         <h2 class="text-xl font-semibold mb-4">Báo cáo bài viết</h2>
                         <p class="text-gray-600 mb-4">Vui lòng chọn lý do báo cáo:</p>
-
+                
                         <form id="reportForm" onsubmit="submitReport(event)">
                             <div class="space-y-2 mb-4">
                                 <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
@@ -133,8 +133,7 @@
                                     <span>Thông tin sai sự thật</span>
                                 </label>
                                 <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                                    <input type="radio" name="reason" value="Bạo lực hoặc ngôn từ thù ghét"
-                                        class="mr-3">
+                                    <input type="radio" name="reason" value="Bạo lực hoặc ngôn từ thù ghét" class="mr-3">
                                     <span>Bạo lực hoặc ngôn từ thù ghét</span>
                                 </label>
                                 <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
@@ -142,15 +141,14 @@
                                     <span>Khác</span>
                                 </label>
                             </div>
-
+                
                             <div class="flex justify-end gap-3">
                                 <button type="button" onclick="closeReportModal()"
                                     class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
                                     Hủy
                                 </button>
-
-                                <button type="submit"
-                                    class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                
+                                <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
                                     Gửi báo cáo
                                 </button>
                             </div>
@@ -972,7 +970,7 @@
                 const reason = document.querySelector('input[name="reason"]:checked').value;
 
                 try {
-                    const response = await fetch(`/post/${reportPostId}/report`, {
+                    const response = await fetch(`/api/post/${reportPostId}/report`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',

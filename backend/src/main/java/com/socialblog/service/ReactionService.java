@@ -4,12 +4,14 @@ import com.socialblog.dto.ReactionRequest;
 import com.socialblog.model.entity.Post;
 import com.socialblog.model.entity.Reaction;
 import com.socialblog.model.entity.User;
+import com.socialblog.model.enums.ReactionType;
 import com.socialblog.repository.PostRepository;
 import com.socialblog.repository.ReactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -115,6 +117,20 @@ public class ReactionService {
         public String getUserReactionForPost(Long postId, User user) {
                 return reactionRepository.findReactionType(postId, user.getId())
                                 .orElse(null);
+        }
+
+        /**
+         * Thống kê top các loại reaction trên một bài post
+         */
+        public List<ReactionCount> topReactions(Post post, int limit) {
+                return reactionRepository.countGroupByType(post.getId()).stream()
+                                .map(row -> new ReactionCount((ReactionType) row[0], (Long) row[1]))
+                                .sorted((a, b) -> Long.compare(b.count(), a.count()))
+                                .limit(limit)
+                                .toList();
+        }
+
+        public record ReactionCount(ReactionType type, long count) {
         }
 
 }

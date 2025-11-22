@@ -5,6 +5,7 @@ com\socialblog\controller\AuthController.class
 com\socialblog\model\entity\Reaction.class
 com\socialblog\dto\RegisterRequest.class
 com\socialblog\model\entity\Post$PostBuilder.class
+com\socialblog\service\ReactionService$ReactionCount.class
 com\socialblog\config\AuthInterceptor.class
 com\socialblog\config\AppConfig.class
 com\socialblog\controller\PostController.class
@@ -21,6 +22,7 @@ com\socialblog\repository\CommentRepository.class
 com\socialblog\model\entity\ConversationMember$ConversationMemberBuilder.class
 com\socialblog\controller\FriendshipController.class
 com\socialblog\model\enums\FriendshipStatus.class
+com\socialblog\repository\ReportRepository.class
 com\socialblog\dto\PostDTO.class
 com\socialblog\dto\ReactionRequest.class
 com\socialblog\controller\CommentController.class
@@ -38,6 +40,8 @@ com\socialblog\service\FriendshipService$1.class
 com\socialblog\model\enums\ConversationType.class
 com\socialblog\dto\CommentDTO.class
 com\socialblog\model\entity\User$UserBuilder.class
+com\socialblog\controller\ReportController.class
+com\socialblog\model\entity\Report$ReportBuilder.class
 com\socialblog\model\enums\Visibility.class
 com\socialblog\model\entity\ConversationMember.class
 com\socialblog\dto\RegisterRequest$RegisterRequestBuilder.class
@@ -46,6 +50,7 @@ com\socialblog\dto\LoginRequest.class
 com\socialblog\dto\UserDTO$UserDTOBuilder.class
 com\socialblog\model\entity\Conversation.class
 com\socialblog\model\entity\Post.class
+com\socialblog\model\enums\ReportStatus.class
 com\socialblog\repository\PostRepository.class
 com\socialblog\dto\CommentRequest.class
 com\socialblog\dto\UserDTO.class
@@ -56,13 +61,16 @@ com\socialblog\service\ReactionService.class
 com\socialblog\model\entity\Comment.class
 com\socialblog\controller\HomeController.class
 com\socialblog\service\AuthService.class
+com\socialblog\model\enums\ReportType.class
 com\socialblog\dto\FriendshipRequestDto.class
 com\socialblog\model\entity\Friendship$FriendshipBuilder.class
 com\socialblog\service\NotificationService.class
 com\socialblog\config\WebConfig.class
 com\socialblog\model\entity\Message$MessageBuilder.class
 com\socialblog\model\entity\PostImage$PostImageBuilder.class
+com\socialblog\controller\AdminController.class
 com\socialblog\service\FriendshipService.class
+com\socialblog\model\entity\Report.class
 com\socialblog\model\BaseEntity.class
 com\socialblog\model\enums\Gender.class
 com\socialblog\model\enums\Role.class
