@@ -3,10 +3,12 @@ package com.socialblog.service;
 import com.socialblog.dto.PostRequest;
 import com.socialblog.model.entity.Post;
 import com.socialblog.model.entity.PostImage;
+import com.socialblog.model.entity.PostVideo;
 import com.socialblog.model.entity.User;
 import com.socialblog.model.enums.Visibility;
 import com.socialblog.repository.PostImageRepository;
 import com.socialblog.repository.PostRepository;
+import com.socialblog.repository.PostVideoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,11 +30,13 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostImageRepository postImageRepository;
+    private final PostVideoRepository postVideoRepository;
 
     private final String UPLOAD_FOLDER = "src/main/resources/static/uploads/";
+    private final String UPLOAD_VIDEO_FOLDER = "src/main/resources/static/uploads_video/";
 
     // ====================== TẠO BÀI VIẾT ======================
-    public void createPost(PostRequest request, User author, List<MultipartFile> files) {
+    public void createPost(PostRequest request, User author, List<MultipartFile> images, List<MultipartFile> videos) {
 
         Post post = Post.builder()
                 .content(request.getContent())
@@ -43,19 +47,36 @@ public class PostService {
         post = postRepository.save(post);
 
         // Lưu ảnh
-        if (files != null && !files.isEmpty()) {
-            for (MultipartFile file : files) {
+        if (images != null && !images.isEmpty()) {
+            for (MultipartFile file : images) {
                 if (file.isEmpty())
                     continue;
 
                 String fileName = saveFile(file);
 
                 PostImage img = PostImage.builder()
-                        .imageUrl(fileName) // chỉ lưu tên file
+                        .imageUrl(fileName)
                         .post(post)
                         .build();
 
                 postImageRepository.save(img);
+            }
+        }
+
+        // Lưu video
+        if (videos != null && !videos.isEmpty()) {
+            for (MultipartFile file : videos) {
+                if (file.isEmpty())
+                    continue;
+
+                String fileName = saveVideo(file);
+
+                PostVideo video = PostVideo.builder()
+                        .videoUrl(fileName)
+                        .post(post)
+                        .build();
+
+                postVideoRepository.save(video);
             }
         }
     }
@@ -79,6 +100,28 @@ public class PostService {
         } catch (Exception e) {
             log.error("Lỗi lưu file: ", e);
             throw new RuntimeException("Không thể lưu file");
+        }
+    }
+
+    // ====================== LƯU FILE VIDEO ======================
+    private String saveVideo(MultipartFile file) {
+        try {
+            File dir = new File(UPLOAD_VIDEO_FOLDER);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            String original = file.getOriginalFilename();
+            String fileName = System.currentTimeMillis() + "_" + original;
+
+            Path path = Paths.get(UPLOAD_VIDEO_FOLDER + fileName);
+            Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+
+            return fileName;
+
+        } catch (Exception e) {
+            log.error("Lỗi lưu video: ", e);
+            throw new RuntimeException("Không thể lưu video");
         }
     }
 

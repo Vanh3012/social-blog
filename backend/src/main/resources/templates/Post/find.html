@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/userbase :: layout(
+          content = ~{::content},
+          script  = ~{::script}
+      )}">
+
+<section th:fragment="content">
+    <div class="max-w-6xl mx-auto space-y-4 px-3">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <form method="get" action="/search" class="grid md:grid-cols-5 gap-3 items-end">
+                <div class="md:col-span-2">
+                    <label class="text-sm text-gray-600">Từ khóa</label>
+                    <input type="text" name="q" th:value="${q}" class="w-full border rounded-lg px-3 py-2" placeholder="Nội dung hoặc tên người dùng">
+                </div>
+                <div>
+                    <label class="text-sm text-gray-600">Loại</label>
+                    <select name="type" class="w-full border rounded-lg px-3 py-2">
+                        <option value="all" th:selected="${type == 'all'}">Tất cả</option>
+                        <option value="posts" th:selected="${type == 'posts'}">Bài viết</option>
+                        <option value="users" th:selected="${type == 'users'}">Mọi người</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm text-gray-600">Từ ngày</label>
+                    <input type="date" name="from" th:value="${from}" class="w-full border rounded-lg px-3 py-2">
+                </div>
+                <div>
+                    <label class="text-sm text-gray-600">Đến ngày</label>
+                    <input type="date" name="to" th:value="${to}" class="w-full border rounded-lg px-3 py-2">
+                </div>
+                <div class="md:col-span-5 flex justify-end">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Tìm kiếm</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-4">
+            <div class="lg:col-span-2 space-y-3">
+                <h2 class="text-lg font-semibold">Bài viết</h2>
+                <div th:if="${#lists.isEmpty(posts)}" class="bg-white border rounded-lg p-4 text-gray-500">
+                    Không có kết quả.
+                </div>
+                <div th:each="post : ${posts}" class="bg-white rounded-lg border p-4 space-y-2">
+                    <div class="flex items-center gap-3">
+                        <img th:if="${post.author.avatarUrl != null}" th:src="@{'/uploads_avatar/' + ${post.author.avatarUrl}}" class="w-10 h-10 rounded-full object-cover">
+                        <div th:if="${post.author.avatarUrl == null}" class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-semibold">
+                            <span th:text="${#strings.substring(post.author.fullName,0,1).toUpperCase()}"></span>
+                        </div>
+                        <div>
+                            <a th:href="@{/user/{id}(id=${post.author.id})}" class="font-semibold hover:underline" th:text="${post.author.fullName}"></a>
+                            <div class="text-xs text-gray-500" th:text="${#temporals.format(post.createdAt,'dd/MM/yyyy HH:mm')}"></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-800" th:text="${post.content}"></p>
+                    <a th:href="@{/post/{id}(id=${post.id})}" class="text-blue-600 text-sm hover:underline">Xem bài viết</a>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <h2 class="text-lg font-semibold">Mọi người</h2>
+                <div th:if="${#lists.isEmpty(users)}" class="bg-white border rounded-lg p-4 text-gray-500">
+                    Không có kết quả.
+                </div>
+                <div th:each="u : ${users}" class="bg-white border rounded-lg p-3 flex items-center gap-3">
+                    <img th:if="${u.avatarUrl != null}" th:src="@{'/uploads_avatar/' + ${u.avatarUrl}}" class="w-12 h-12 rounded-full object-cover">
+                    <div th:if="${u.avatarUrl == null}" class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center font-semibold">
+                        <span th:text="${#strings.substring(u.fullName,0,1).toUpperCase()}"></span>
+                    </div>
+                    <div>
+                        <a th:href="@{/user/{id}(id=${u.id})}" class="font-semibold text-gray-900 hover:underline" th:text="${u.fullName}"></a>
+                        <p class="text-xs text-gray-500" th:text="'@' + ${u.username}"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section th:fragment="script">
+    <script></script>
+</section>
+
+</html>

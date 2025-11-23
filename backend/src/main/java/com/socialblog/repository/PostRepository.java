@@ -24,6 +24,22 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     // bài viết của 1 user với visibility cụ thể
     List<Post> findByAuthorAndVisibilityOrderByCreatedAtDesc(User author, Visibility visibility);
 
+    // Bài có video của user
+    @Query("SELECT DISTINCT p FROM Post p JOIN p.videos v WHERE p.author = :author ORDER BY p.createdAt DESC")
+    List<Post> findPostsWithVideos(@Param("author") User author);
+
+    // Search post by content + optional time range
+    @Query("""
+            SELECT p FROM Post p
+            WHERE (:keyword IS NULL OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%')))
+              AND (:fromDate IS NULL OR p.createdAt >= :fromDate)
+              AND (:toDate IS NULL OR p.createdAt <= :toDate)
+            ORDER BY p.createdAt DESC
+            """)
+    List<Post> searchPosts(@Param("keyword") String keyword,
+            @Param("fromDate") java.time.LocalDateTime fromDate,
+            @Param("toDate") java.time.LocalDateTime toDate);
+
     // bài viết hiển thị với user (public + private của chính họ + bạn bè)
     @Query("""
             SELECT p FROM Post p

@@ -18,4 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUsername(String username);
 
     long countByActiveTrue();
+
+    // Search user by name or username
+    java.util.List<User> findByFullNameContainingIgnoreCaseOrUsernameContainingIgnoreCase(String name, String username);
 }

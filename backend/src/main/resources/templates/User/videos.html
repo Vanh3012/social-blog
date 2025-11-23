@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/userbase :: layout(
+          content = ~{::content},
+          script  = ~{::script}
+      )}">
+
+<section th:fragment="content">
+    <div class="max-w-5xl mx-auto space-y-4">
+        <div class="bg-white rounded-lg shadow-sm p-4 flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold">Video</h1>
+                <p class="text-sm text-gray-500" th:text="${profileUser.fullName}"></p>
+            </div>
+            <a th:href="@{/user/{id}(id=${profileUser.id})}" class="text-blue-600 text-sm hover:underline">Quay lại trang cá nhân</a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(videoPosts)}" class="bg-white rounded-lg shadow-sm p-6 text-center text-gray-500">
+            Chưa có video nào.
+        </div>
+
+        <div th:unless="${#lists.isEmpty(videoPosts)}" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div th:each="post : ${videoPosts}">
+                <div th:each="vid : ${post.videos}" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <video th:src="@{'/uploads_video/' + ${vid.videoUrl}}"
+                        class="w-full max-h-[280px] object-cover bg-black"
+                        controls></video>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section th:fragment="script">
+    <script>
+        // No extra JS needed for simple playback
+    </script>
+</section>
+
+</html>

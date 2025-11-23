@@ -26,6 +26,7 @@ import com.socialblog.service.ProfileService;
 import com.socialblog.repository.PostImageRepository;
 import com.socialblog.service.FriendshipService;
 import com.socialblog.service.ReactionService;
+import com.socialblog.repository.PostVideoRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class ProfileController {
     private final PostRepository postRepository;
     private final ProfileService profileService;
     private final PostImageRepository postImageRepository;
+    private final PostVideoRepository postVideoRepository;
     private final ReactionRepository reactionRepository;
     private final FriendshipService friendshipService;
     private final ReactionService reactionService;
@@ -139,6 +141,22 @@ public class ProfileController {
         model.addAttribute("profileUser", profileUser);
         model.addAttribute("currentUser", currentUser);
         return "User/about";
+    }
+
+    // =================== TRANG VIDEO ===================
+    @GetMapping("/user/{id}/videos")
+    public String viewUserVideos(@PathVariable Long id, Model model, HttpSession session) {
+        User profileUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserDTO currentUser = (UserDTO) session.getAttribute("currentUser");
+
+        List<Post> videoPosts = postRepository.findPostsWithVideos(profileUser);
+
+        model.addAttribute("profileUser", profileUser);
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("videoPosts", videoPosts);
+        return "User/videos";
     }
 
     // =================== TRANG XEM TẤT CẢ ẢNH ===================

@@ -54,6 +54,10 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostImage> images = new ArrayList<>();
 
+    // ===== Quan hệ với PostVideo =====
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostVideo> videos = new ArrayList<>();
+
     // ===== Helper methods để tính toán count =====
     public int getLikeCount() {
         if (reactions != null) {

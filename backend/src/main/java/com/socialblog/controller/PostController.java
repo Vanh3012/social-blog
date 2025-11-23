@@ -54,6 +54,7 @@ public class PostController {
     public String createPost(
             @ModelAttribute("post") PostRequest request,
             @RequestParam("images") MultipartFile[] images,
+            @RequestParam(value = "videos", required = false) MultipartFile[] videos,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
@@ -67,7 +68,7 @@ public class PostController {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
 
         try {
-            postService.createPost(request, user, List.of(images));
+            postService.createPost(request, user, List.of(images), videos != null ? List.of(videos) : List.of());
             redirectAttributes.addFlashAttribute("successMessage", "Đăng bài thành công!");
             return "redirect:/";
         } catch (Exception e) {
