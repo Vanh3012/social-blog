@@ -9,7 +9,7 @@
     <!-- ===============    CONTENT SECTION    =============== -->
     <section th:fragment="content">
 
-        <div class="max-w-5xl mx-auto">
+        <div class="max-w-9xl mx-auto ">
 
             <!-- PROFILE HEADER CARD -->
             <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
@@ -41,8 +41,9 @@
                             <input type="file" id="coverInput" name="cover" accept="image/*" onchange="this.form.submit()">
                         </form>
                     </div>
-                </div>
+                 </div>
 
+   
                 <!-- Profile info -->
                 <div class="px-4 sm:px-6 pb-4 pt-4">
                     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 -mt-12 md:-mt-14">
@@ -84,28 +85,26 @@
                                         <span class="text-gray-500">bài viết</span>
                                     </div>
                                     <div>
-                                        <span class="font-semibold text-gray-900">1.2K</span>
+                                        <span class="font-semibold text-gray-900" th:text="${friends != null ? #lists.size(friends) : 0}">0</span>
                                         <span class="text-gray-500">bạn bè</span>
-                                    </div>
-                                    <div>
-                                        <span class="font-semibold text-gray-900">890</span>
-                                        <span class="text-gray-500">theo dõi</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 pb-2">
-                            <div th:if="${currentUser != null and currentUser.id == profileUser.id}">
-                                <a th:href="@{/user/{id}/edit(id=${profileUser.id})}" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium 
-                                           hover:bg-blue-700 transition flex items-center gap-2 shadow-sm">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414
-                                               a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                    Chỉnh sửa
-                                </a>
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-2 pb-2 md:ml-auto md:self-start md:mt-16 md:mr-2">
+                                <div th:if="${currentUser != null and currentUser.id == profileUser.id}">
+                                    <a th:href="@{/user/{id}/edit(id=${profileUser.id})}" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md text-sm font-medium 
+                                            hover:bg-gray-300 transition flex items-center gap-2 shadow-sm border border-gray-300">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414
+                                                a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                        Chỉnh sửa
+                                    </a>
+                                </div>
                             </div>
+
+                        
 
                             <div th:unless="${currentUser != null and currentUser.id == profileUser.id}" class="flex gap-2 flex-wrap" id="friend-action-wrap">
                                 <div th:if="${currentUser == null}">
@@ -218,10 +217,10 @@
             </div>
 
             <!-- CONTENT GRID (2 Columns on Desktop) -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div class="grid grid-cols-1 lg:grid-cols-10 gap-4 items-start ">
 
                 <!-- Left Column: About -->
-                <div class="lg:col-span-5">
+                <div class="lg:col-span-3 lg:pl-0">
                     <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
                         <!-- BIO -->
                          <div class="mb-4" >
@@ -238,6 +237,7 @@
                     </div>
 
                     <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+                         <!-- Friends Section -->
                         <div class="flex items-center justify-between mb-3">
                             <h2 class="font-bold text-xl">Bạn bè</h2>
                             <span class="text-sm text-gray-500" th:text="${#lists.size(friends)} + ' bạn'">0 bạn</span>
@@ -256,7 +256,7 @@
                         </div>
                     </div>
 
-                    <div th:if="${currentUser != null}" class="bg-white rounded-lg shadow-sm p-4 mb-4">
+                    <div th:if="${currentUser != null}" class="bg-white rounded-lg shadow-sm p-4">
                         <div class="flex items-center justify-between mb-3">
                             <h2 class="font-bold text-lg">Lời mời kết bạn</h2>
                             <span class="text-sm text-gray-500" th:text="${#lists.size(pendingFriendRequests)} + ' lời mời'">0 lời mời</span>
@@ -287,7 +287,7 @@
                         </div>
                     </div>
 
-                    <div th:if="${currentUser != null}" class="bg-white rounded-lg shadow-sm p-4 mb-4">
+                    <div th:if="${currentUser != null}" class="bg-white rounded-lg shadow-sm p-4">
                         <div class="flex items-center justify-between mb-3">
                             <h2 class="font-bold text-lg">Gợi ý kết bạn</h2>
                             <span class="text-sm text-gray-500" th:text="${#lists.size(friendSuggestions)} + ' gợi ý'">0 gợi ý</span>
@@ -350,11 +350,11 @@
                 </div>
 
                 <!-- Right Column: Posts -->
-                <div class="lg:col-span-7">
+                <div class="lg:col-span-7  lg:pr-0 space-y-4">
 
                     <!-- Create Post (if own profile) -->
                     <div th:if="${currentUser != null and currentUser.id == profileUser.id}"
-                        class="bg-white rounded-lg shadow-sm p-4 mb-4">
+                         class="bg-white rounded-lg shadow-sm p-4">
                         <div class="flex gap-3">
                             <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
                                 <img th:if="${profileUser.avatarUrl != null}" th:src="@{'/uploads_avatar/' + ${profileUser.avatarUrl}}"
@@ -384,7 +384,7 @@
                         <article th:each="post : ${posts}" class="bg-white rounded-lg shadow-sm hover:shadow-md transition-smooth"
                             th:attr="data-post-id=${post.id},data-user-reaction=${userReactions != null ? userReactions.get(post.id) : ''}">
 
-                            <div class="p-4 pb-3 cursor-pointer" th:onclick="'window.location.href=\'/post/' + '[[${post.id}]]' + '\''">
+                            <div class="p-4 pb-3 cursor-pointer" th:onclick="|window.location.href='@{/post/{id}(id=${post.id})}'|">
 
                             <!-- Post Header -->
                             <div class="p-4 pb-3">
@@ -396,15 +396,21 @@
                                     <div class="flex-1 min-w-0">
                                         <p class="font-semibold text-sm text-gray-900 hover:underline"
                                             th:text="${profileUser.fullName}"></p>
-                                        <div class="flex items-center gap-1 text-xs text-gray-500">
+                                        <div class="flex items-center gap-1 text-xs text-gray-500" th:with="vis=${post.visibility != null ? post.visibility.name() : 'PUBLIC'}">
                                             <span
                                                 th:text="${#temporals.format(post.createdAt,'dd/MM/yyyy HH:mm')}"></span>
                                             <span>·</span>
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z"
-                                                    clip-rule="evenodd"></path>
-                                            </svg>
+                                            <span th:switch="${vis}">
+                                                <svg th:case="'PUBLIC'" class="w-3.5 h-3.5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm7.938 9h-2.112a7.963 7.963 0 00-.72-3.094 8.04 8.04 0 012.832 3.094zM12 4c1.818 0 3.487.62 4.828 1.66a9.94 9.94 0 00-1.143 1.34A9.946 9.946 0 0012 6c-.427 0-.844.032-1.253.093A7.947 7.947 0 0012 4zm-2.637.445A7.99 7.99 0 004.174 9H6.41a9.977 9.977 0 012.953-4.555zM4.062 13h2.111a7.963 7.963 0 00.72 3.094A8.04 8.04 0 014.062 13zM8.1 13H10v2.93A7.967 7.967 0 018.1 13zm3.9 4.93V13h1.9a7.967 7.967 0 01-1.9 4.93zM14 13h1.9a7.967 7.967 0 01-1.9 2.93V13zm0-2V8.07A7.967 7.967 0 0115.9 11H14zm-2 0h-1.9A7.967 7.967 0 0112 8.07V11zm0-4.93V11h-1.9A7.967 7.967 0 0112 6.07zM17.59 15a9.977 9.977 0 01-2.953 4.555A7.99 7.99 0 0019.826 15H17.59zM6.41 15H4.174a7.99 7.99 0 004.806 4.555A9.977 9.977 0 016.41 15zM4.062 11a8.04 8.04 0 012.832-3.094A7.963 7.963 0 006.173 11H4.062zM14 6.07c.643.568 1.212 1.227 1.684 1.952.158.244.304.496.438.756H14V6.07zM10 6.07V8.78H8.114a7.9 7.9 0 01.438-.756A9.99 9.99 0 0110 6.07zM17.827 11h-2.236a9.946 9.946 0 00-.342-1.25 9.94 9.94 0 011.143-1.34A7.99 7.99 0 0117.827 11z"/>
+                                                </svg>
+                                                <svg th:case="'FRIENDS'" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05A5.48 5.48 0 0118 16.5V19h4v-2.5c0-2.33-4.67-3.5-6-3.5z"/>
+                                                </svg>
+                                                <svg th:case="*" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 3a4 4 0 00-4 4v1H5a2 2 0 00-2 2v3a3 3 0 003 3h8a3 3 0 003-3v-3a2 2 0 00-2-2h-1V7a4 4 0 00-4-4zm2 5V7a2 2 0 10-4 0v1h4z" clip-rule="evenodd"/>
+                                                </svg>
+                                            </span>
                                         </div>
                                     </div>
                                     
@@ -520,7 +526,28 @@
                                 </div>
 
                                 <!-- Post Content -->
-                                <p class="text-gray-800 text-sm leading-relaxed mb-3" th:text="${post.content}"></p>
+                                <div th:if="${post.originalPost == null}">
+                                    <p class="text-gray-800 text-sm leading-relaxed mb-3" th:text="${post.content}"></p>
+                                </div>
+                                <div th:if="${post.originalPost != null}" class="space-y-3">
+                                    <p th:if="${post.content != null and !#strings.isEmpty(post.content)}"
+                                        class="text-gray-800 text-sm leading-relaxed mb-3" th:text="${post.content}"></p>
+                                    <div class="border rounded-lg p-3 bg-gray-50">
+                                        <div class="text-sm text-gray-600">
+                                            <span th:text="${post.author.fullName}"></span>
+                                            <span>đã chia sẻ</span>
+                                            <span th:text="${post.originalPost.author.fullName}"></span>
+                                        </div>
+                                        <p class="mt-2 text-gray-800 text-sm leading-relaxed mb-3"
+                                            th:text="${post.originalPost.content}">Nội dung gốc</p>
+                                        <div th:if="${post.originalPost.images != null and !#lists.isEmpty(post.originalPost.images)}"
+                                            class="grid grid-cols-2 gap-2">
+                                            <img th:each="img : ${post.originalPost.images}"
+                                                th:src="@{'/uploads/' + ${img.imageUrl}}"
+                                                class="w-full rounded-lg object-cover">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- ============ HÌNH ẢNH ============ -->
@@ -598,6 +625,7 @@
                             
                                     <div class="flex items-center gap-3">
                                         <span th:text="${post.commentCount} + ' bình luận'">0 bình luận</span>
+                                        <span th:text="${post.repostCount} + ' chia sẻ'">0 chia sẻ</span>
                                     </div>
                                 </div>
                             
@@ -678,7 +706,7 @@
                                     </a>
                             
                                     <!-- ======================= SHARE BUTTON ======================= -->
-                                    <button class="py-2 rounded-lg hover:bg-gray-100 
+                                    <button type="button" th:onclick="'openShareModal(' + ${post.id} + '); event.stopPropagation();'" class="py-2 rounded-lg hover:bg-gray-100 
                                                                flex items-center justify-center gap-2 transition-all">
                             
                                         <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -712,6 +740,23 @@
             </div>
         </div>
     </div>
+        <!-- SHARE MODAL -->
+        <div id="shareModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
+                <h2 class="text-xl font-semibold mb-4">Chia sẻ bài viết</h2>
+                <form id="shareForm">
+                    <textarea id="shareNote" name="note" rows="4"
+                        class="w-full border rounded-lg p-3 focus:outline-none focus:ring"
+                        placeholder="Viết gì đó khi chia sẻ (có thể để trống)"></textarea>
+                    <div class="flex justify-end gap-3 mt-4">
+                        <button type="button" onclick="closeShareModal()"
+                            class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">Hủy</button>
+                        <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Chia
+                            sẻ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </section>
    
 
@@ -963,6 +1008,57 @@
                 document.getElementById('reportModal').classList.add('hidden');
                 document.getElementById('reportModal').classList.remove('flex');
                 document.getElementById('reportForm').reset();
+            }
+            // Repost with modal
+            let sharePostId = null;
+
+            function openShareModal(postId) {
+                sharePostId = postId;
+                const modal = document.getElementById('shareModal');
+                const noteInput = document.getElementById('shareNote');
+                if (noteInput) noteInput.value = '';
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+            }
+
+            function closeShareModal() {
+                const modal = document.getElementById('shareModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+                sharePostId = null;
+            }
+
+            const shareForm = document.getElementById('shareForm');
+            if (shareForm) {
+                shareForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    if (!sharePostId) {
+                        alert('Không xác định bài viết');
+                        return;
+                    }
+                    const note = document.getElementById('shareNote')?.value || '';
+                    const body = note ? `note=${encodeURIComponent(note)}` : null;
+
+                    fetch(`/post/${sharePostId}/repost`, {
+                        method: 'POST',
+                        headers: body ? { 'Content-Type': 'application/x-www-form-urlencoded' } : undefined,
+                        body: body
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                location.reload();
+                            } else {
+                                alert(data.message || 'Không thể chia sẻ bài viết');
+                            }
+                        })
+                        .catch(() => alert('Vui lòng đăng nhập'))
+                        .finally(() => closeShareModal());
+                });
             }
     </script>
     

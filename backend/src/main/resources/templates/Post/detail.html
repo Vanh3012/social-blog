@@ -27,13 +27,20 @@
                         <a th:href="@{/user/{id}(id=${post.author.id})}"
                             class="font-semibold text-base text-gray-900 hover:underline"
                             th:text="${post.author.fullName}">fullName</a>
-                        <div class="flex items-center gap-1 text-xs text-gray-500">
+                        <div class="flex items-center gap-1 text-xs text-gray-500" th:with="vis=${post.visibility != null ? post.visibility.name() : 'PUBLIC'}">
                             <span th:text="${#temporals.format(post.createdAt,'dd/MM/yyyy HH:mm')}">time</span>
                             <span>·</span>
-                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path
-                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" />
-                            </svg>
+                            <span th:switch="${vis}">
+                                <svg th:case="'PUBLIC'" class="w-3.5 h-3.5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm7.938 9h-2.112a7.963 7.963 0 00-.72-3.094 8.04 8.04 0 012.832 3.094zM12 4c1.818 0 3.487.62 4.828 1.66a9.94 9.94 0 00-1.143 1.34A9.946 9.946 0 0012 6c-.427 0-.844.032-1.253.093A7.947 7.947 0 0012 4zm-2.637.445A7.99 7.99 0 004.174 9H6.41a9.977 9.977 0 012.953-4.555zM4.062 13h2.111a7.963 7.963 0 00.72 3.094A8.04 8.04 0 014.062 13zM8.1 13H10v2.93A7.967 7.967 0 018.1 13zm3.9 4.93V13h1.9a7.967 7.967 0 01-1.9 4.93zM14 13h1.9a7.967 7.967 0 01-1.9 2.93V13zm0-2V8.07A7.967 7.967 0 0115.9 11H14zm-2 0h-1.9A7.967 7.967 0 0112 8.07V11zm0-4.93V11h-1.9A7.967 7.967 0 0112 6.07zM17.59 15a9.977 9.977 0 01-2.953 4.555A7.99 7.99 0 0019.826 15H17.59zM6.41 15H4.174a7.99 7.99 0 004.806 4.555A9.977 9.977 0 016.41 15zM4.062 11a8.04 8.04 0 012.832-3.094A7.963 7.963 0 006.173 11H4.062zM14 6.07c.643.568 1.212 1.227 1.684 1.952.158.244.304.496.438.756H14V6.07zM10 6.07V8.78H8.114a7.9 7.9 0 01.438-.756A9.99 9.99 0 0110 6.07zM17.827 11h-2.236a9.946 9.946 0 00-.342-1.25 9.94 9.94 0 011.143-1.34A7.99 7.99 0 0117.827 11z"/>
+                                </svg>
+                                <svg th:case="'FRIENDS'" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05A5.48 5.48 0 0118 16.5V19h4v-2.5c0-2.33-4.67-3.5-6-3.5z"/>
+                                </svg>
+                                <svg th:case="*" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 3a4 4 0 00-4 4v1H5a2 2 0 00-2 2v3a3 3 0 003 3h8a3 3 0 003-3v-3a2 2 0 00-2-2h-1V7a4 4 0 00-4-4zm2 5V7a2 2 0 10-4 0v1h4z" clip-rule="evenodd"/>
+                                </svg>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -160,8 +167,29 @@
 
             <!-- ========== CONTENT ========== -->
             <div class="px-4 pb-3">
-                <p class="text-[15px] text-gray-900 whitespace-pre-wrap leading-relaxed" th:text="${post.content}">Nội
-                    dung bài viết</p>
+                <div th:if="${post.originalPost == null}">
+                    <p class="text-[15px] text-gray-900 whitespace-pre-wrap leading-relaxed" th:text="${post.content}">Nội
+                        dung bài viết</p>
+                </div>
+                <div th:if="${post.originalPost != null}" class="space-y-3">
+                    <p th:if="${post.content != null and !#strings.isEmpty(post.content)}"
+                        class="text-[15px] text-gray-900 whitespace-pre-wrap leading-relaxed" th:text="${post.content}">
+                    </p>
+                    <a th:href="@{/post/{id}(id=${post.originalPost.id})}" class="block border rounded-lg p-3 bg-gray-50 hover:bg-gray-100 transition">
+                        <div class="text-sm text-gray-600">
+                            <span th:text="${post.author.fullName}"></span>
+                            <span>đã chia sẻ</span>
+                            <span th:text="${post.originalPost.author.fullName}"></span>
+                        </div>
+                        <p class="mt-2 text-[15px] text-gray-900 whitespace-pre-wrap leading-relaxed"
+                            th:text="${post.originalPost.content}">Nội dung gốc</p>
+                        <div th:if="${post.originalPost.images != null and !#lists.isEmpty(post.originalPost.images)}"
+                            class="grid grid-cols-2 gap-2 mt-3">
+                            <img th:each="img : ${post.originalPost.images}" th:src="@{'/uploads/' + ${img.imageUrl}}"
+                                class="w-full rounded-lg object-cover">
+                        </div>
+                    </a>
+                </div>
             </div>
 
             <!-- ========== IMAGES GRID ========== -->
@@ -296,7 +324,10 @@
                         <span class="like-count" th:text="${post.likeCount}">0</span>
                     </div>
 
-                    <span th:text="${post.commentCount} + ' bình luận'">0 bình luận</span>
+                    <div class="flex items-center gap-3">
+                        <span th:text="${post.commentCount} + ' bình luận'">0 bình luận</span>
+                        <span th:text="${post.repostCount} + ' chia sẻ'">0 chia sẻ</span>
+                    </div>
                 </div>
 
                 <!-- Divider -->
@@ -372,7 +403,7 @@
                     </a>
 
                     <!-- SHARE -->
-                    <button
+                    <button type="button" th:onclick="'openShareModal(' + ${post.id} + '); event.stopPropagation();'"
                         class="py-2 rounded-lg hover:bg-gray-100 flex items-center justify-center gap-2 transition-all">
                         <svg class="text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             style="width: 20px; height: 20px;">
@@ -625,6 +656,21 @@
             </div>
 
         </article>
+
+        <!-- SHARE MODAL -->
+        <div id="shareModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
+                <h2 class="text-xl font-semibold mb-4">Chia sẻ bài viết</h2>
+                <form id="shareForm">
+                    <textarea id="shareNote" name="note" rows="4" class="w-full border rounded-lg p-3 focus:outline-none focus:ring"
+                        placeholder="Viết gì đó khi chia sẻ (có thể để trống)"></textarea>
+                    <div class="flex justify-end gap-3 mt-4">
+                        <button type="button" onclick="closeShareModal()" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">Hủy</button>
+                        <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Chia sẻ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
     </section>
 
@@ -1022,6 +1068,58 @@
                 const modal = document.getElementById('deleteCommentModal');
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
+            }
+
+            // Repost with modal
+            let sharePostId = null;
+
+            function openShareModal(postId) {
+                sharePostId = postId;
+                const modal = document.getElementById('shareModal');
+                const noteInput = document.getElementById('shareNote');
+                if (noteInput) noteInput.value = '';
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+            }
+
+            function closeShareModal() {
+                const modal = document.getElementById('shareModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+                sharePostId = null;
+            }
+
+            const shareForm = document.getElementById('shareForm');
+            if (shareForm) {
+                shareForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    if (!sharePostId) {
+                        alert('Không xác định bài viết');
+                        return;
+                    }
+                    const note = document.getElementById('shareNote')?.value || '';
+                    const body = note ? `note=${encodeURIComponent(note)}` : null;
+
+                    fetch(`/post/${sharePostId}/repost`, {
+                        method: 'POST',
+                        headers: body ? { 'Content-Type': 'application/x-www-form-urlencoded' } : undefined,
+                        body: body
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                location.reload();
+                            } else {
+                                alert(data.message || 'Không thể chia sẻ bài viết');
+                            }
+                        })
+                        .catch(() => alert('Vui lòng đăng nhập'))
+                        .finally(() => closeShareModal());
+                });
             }
 
         </script>

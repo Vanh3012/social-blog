@@ -29,6 +29,14 @@ public class Post extends BaseEntity {
     @Column(name = "comment_count")
     private int commentCount = 0;
 
+    @Builder.Default
+    @Column(name = "repost_count")
+    private Integer repostCount = 0;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "original_post_id")
+    private Post originalPost;
+
     // ===== Quan hệ với tác giả (User) =====
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
@@ -69,5 +77,16 @@ public class Post extends BaseEntity {
 
     public void updateCommentCount() {
         this.commentCount = getCommentCount();
+    }
+
+    public int getRepostCount() {
+        return this.repostCount == null ? 0 : this.repostCount;
+    }
+
+    public void incrementRepostCount() {
+        if (this.repostCount == null) {
+            this.repostCount = 0;
+        }
+        this.repostCount = this.repostCount + 1;
     }
 }

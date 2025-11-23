@@ -87,13 +87,45 @@ public class PostService {
         return postRepository.findByVisibilityOrderByCreatedAtDesc(Visibility.PUBLIC);
     }
 
+    public List<Post> getPostsForUser(User user, List<Long> friendIds) {
+        if (user == null) {
+            return getPublicPosts();
+        }
+        List<Long> ids = (friendIds == null || friendIds.isEmpty()) ? List.of(-1L) : friendIds;
+        return postRepository.findVisibleForUser(user.getId(), ids);
+    }
+
     public List<Post> getPostsForUser(User user) {
-        return postRepository.findPostsForUser(user.getId());
+        return getPostsForUser(user, List.of());
     }
 
     public Post getPostById(Long id) {
         return postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết"));
+    }
+
+    // ====================== REPOST ======================
+    public Post repost(Post originalPost, User author, String note) {
+        if (originalPost == null) {
+            throw new RuntimeException("Bài viết không tồn tại");
+        }
+
+        if (originalPost.getVisibility() == Visibility.PRIVATE
+                && !originalPost.getAuthor().getId().equals(author.getId())) {
+            throw new RuntimeException("Bài viết riêng tư không thể chia sẻ");
+        }
+
+        Post repost = Post.builder()
+                .content(note)
+                .visibility(originalPost.getVisibility())
+                .author(author)
+                .originalPost(originalPost)
+                .build();
+
+        originalPost.incrementRepostCount();
+        postRepository.save(originalPost);
+
+        return postRepository.save(repost);
     }
 
     // ====================== CẬP NHẬT BÀI VIẾT ======================

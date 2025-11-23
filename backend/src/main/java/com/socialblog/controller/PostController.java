@@ -20,6 +20,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.socialblog.dto.CommentRequest;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import org.springframework.http.ResponseEntity;
 
 @Controller
 @RequestMapping("/post")
@@ -170,5 +173,36 @@ public class PostController {
         postService.deletePost(id, currentUser.getId());
         ra.addFlashAttribute("success", "Xóa bài viết thành công");
         return "redirect:/";
+    }
+    // CHIA SẺ / REPOST
+    @PostMapping("/{id}/repost")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> repost(@PathVariable Long id,
+            @RequestParam(value = "note", required = false) String note,
+            HttpSession session) {
+
+        Map<String, Object> resp = new HashMap<>();
+        UserDTO currentUser = (UserDTO) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            resp.put("success", false);
+            resp.put("message", "Vui lòng đăng nhập");
+            return ResponseEntity.status(401).body(resp);
+        }
+
+        try {
+            Post original = postService.getPostById(id);
+            User user = userRepository.findById(currentUser.getId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+
+            postService.repost(original, user, note);
+            resp.put("success", true);
+            resp.put("message", "Chia sẻ bài viết thành công");
+            return ResponseEntity.ok(resp);
+        } catch (Exception e) {
+            log.error("Lỗi repost", e);
+            resp.put("success", false);
+            resp.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(resp);
+        }
     }
 }

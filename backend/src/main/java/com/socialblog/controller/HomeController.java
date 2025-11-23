@@ -15,10 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -32,7 +34,8 @@ public class HomeController {
     private final ReactionService reactionService;
 
     @GetMapping("/")
-    public String home(HttpSession session, Model model) {
+    public String home(HttpSession session, Model model,
+            @RequestParam(name = "filter", defaultValue = "all") String filter) {
 
         UserDTO currentUserDTO = (UserDTO) session.getAttribute("currentUser");
 
@@ -41,13 +44,17 @@ public class HomeController {
         List<Friendship> pendingRequests = List.of();
         List<User> friendSuggestions = List.of();
         Map<Long, List<com.socialblog.service.ReactionService.ReactionCount>> topReactions = new HashMap<>();
+        List<Long> friendIds;
 
         if (currentUserDTO != null) {
 
             // User đã đăng nhập
             User currentUser = userRepository.findById(currentUserDTO.getId()).orElse(null);
 
-            posts = postService.getPostsForUser(currentUser);
+            List<User> friends = friendshipService.listFriends(currentUserDTO.getId());
+            friendIds = friends.stream().map(User::getId).collect(Collectors.toList());
+
+            posts = postService.getPostsForUser(currentUser, friendIds);
 
             // Lấy reaction của user cho từng post
             if (currentUser != null) {
@@ -66,8 +73,23 @@ public class HomeController {
         } else {
             // Khách (chưa đăng nhập) → chỉ xem public posts
             posts = postService.getPublicPosts();
+            friendIds = List.of();
 
         }
+
+        final List<Long> visibleFriendIds = friendIds;
+        posts = switch (filter.toLowerCase()) {
+            case "public" -> posts.stream()
+                    .filter(p -> p.getVisibility() == com.socialblog.model.enums.Visibility.PUBLIC)
+                    .toList();
+            case "friends" -> posts.stream()
+                    .filter(p -> p.getVisibility() == com.socialblog.model.enums.Visibility.FRIENDS
+                            && (visibleFriendIds.contains(p.getAuthor().getId())
+                                    || (currentUserDTO != null
+                                            && p.getAuthor().getId().equals(currentUserDTO.getId()))))
+                    .toList();
+            default -> posts;
+        };
 
         // Tính top reactions cho mọi post (kể cả khách)
         for (Post p : posts) {
@@ -80,6 +102,7 @@ public class HomeController {
         model.addAttribute("pendingFriendRequests", pendingRequests);
         model.addAttribute("friendSuggestions", friendSuggestions);
         model.addAttribute("topReactions", topReactions);
+        model.addAttribute("currentFilter", filter.toLowerCase());
 
         return "Post/home";
     }
