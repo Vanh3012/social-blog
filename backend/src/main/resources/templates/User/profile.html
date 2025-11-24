@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/userbase :: layout(
           content = ~{::content},
           script  = ~{::script}
@@ -22,7 +22,7 @@
                             class="w-full h-full bg-gradient-to-br from-blue-400 via-blue-600 to-indigo-700 absolute inset-0"></div>
                         <div class="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30"></div>
                         <a th:if="${profileUser.coverUrl != null}" th:href="@{'/uploads_avatar/' + ${profileUser.coverUrl}}"
-                            target="_blank" rel="noopener" aria-label="Xem ảnh bìa"
+                            target="_blank" rel="noopener" aria-label="Xem áº£nh bÃ¬a"
                             class="absolute inset-0 z-10"></a>
                     </div>
                     <div th:if="${currentUser != null and currentUser.id == profileUser.id}" class="absolute bottom-4 right-4 z-20">
@@ -58,7 +58,7 @@
                                     </div>
                                 </div>
                                 <a th:if="${profileUser.avatarUrl != null}" th:href="@{'/uploads_avatar/' + ${profileUser.avatarUrl}}"
-                                    target="_blank" rel="noopener" aria-label="Xem ảnh đại diện"
+                                    target="_blank" rel="noopener" aria-label="Xem áº£nh Ä‘áº¡i diá»‡n"
                                     class="absolute inset-0 rounded-full z-10"></a>
                                 <button th:if="${currentUser != null and currentUser.id == profileUser.id}" type="button"
                                     onclick="document.getElementById('avatarInput').click()"
@@ -183,15 +183,18 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <button
-                                        class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition flex items-center gap-2">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
-                                            </path>
-                                        </svg>
-                                        Nhắn tin
+                                    <button>
+                                            <a th:href="@{/messages/user/{id}(id=${profileUser.id})}"
+                                                class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition flex items-center gap-2">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                                                    </path>
+                                                </svg>
+                                                Nhắn tin
+                                            </a>
                                     </button>
+                                        
                                 </div>
                             </div>
                         </div>
@@ -203,13 +206,11 @@
                         <a th:href="@{/user/{id}(id=${profileUser.id})}"
                             class="px-5 py-3 text-sm font-semibold text-blue-600 border-b-2 border-blue-600 whitespace-nowrap">Bài viết</a>
                         <a th:href="@{/user/{id}/about(id=${profileUser.id})}"
-                            class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">Giới
-                            thiệu</a>
-                        <button
-                            class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">Bạn
-                            bè</button>
-                        <button 
-                            class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth"><a th:href="@{/user/{id}/photos(id=${profileUser.id})}">Ảnh</a></button>
+                            class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">Giới thiệu</a>
+                        <a th:href="@{/user/{id}/friends(id=${profileUser.id})}"
+                            class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">Bạn bè</a>
+                        <a th:href="@{/user/{id}/photos(id=${profileUser.id})}"
+                            class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">Ảnh</a>
                         <a th:href="@{/user/{id}/videos(id=${profileUser.id})}"
                             class="px-5 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md whitespace-nowrap transition-smooth">Video</a>
                     </div>
@@ -321,21 +322,21 @@
                                 cả</a>
                         </div>
                     
-                        <!-- Khi không có ảnh -->
+                        <!-- Khi khÃ´ng cÃ³ áº£nh -->
                         <div th:if="${#lists.isEmpty(images)}" class="text-gray-500 text-sm py-4 text-center">
-                            Chưa có ảnh nào
+                            Chưa có ảnh nào.
                         </div>
                     
-                        <!-- Khi có ảnh -->
+                        <!-- Khi cÃ³ áº£nh -->
                         <div th:unless="${#lists.isEmpty(images)}" class="grid grid-cols-3 gap-2">
                     
-                            <!-- Lặp 6 ảnh đầu tiên -->
+                            <!-- Láº·p 6 áº£nh Ä‘áº§u tiÃªn -->
                             <div th:each="img, iter : ${images}" th:if="${iter.index < 6}"
                                 class="relative aspect-square rounded-lg overflow-hidden bg-gray-200">
                     
                                 <img th:src="@{'/uploads/' + ${img.imageUrl}}" class="w-full h-full object-cover">
                     
-                                <!-- Nếu ảnh thứ 6 và tổng ảnh > 6 -> hiện overlay -->
+                                <!-- Náº¿u áº£nh thá»© 6 vÃ  tá»•ng áº£nh > 6 -> hiá»‡n overlay -->
                                 <div th:if="${iter.index == 5 and #lists.size(images) > 6}"
                                     class="absolute inset-0 bg-black/50 flex items-center justify-center">
                                     <span class="text-white text-xl font-semibold" th:text="'+' + (${#lists.size(images)} - 6)"></span>
@@ -550,10 +551,10 @@
                                 </div>
                             </div>
 
-                            <!-- ============ HÌNH ẢNH ============ -->
+                            <!-- ============ HÃŒNH áº¢NH ============ -->
                             <div th:if="${post.images != null and !#lists.isEmpty(post.images)}" class="relative bg-black">
                             
-                                <!-- 1 ảnh: Full width -->
+                                <!-- 1 áº£nh: Full width -->
                                 <div th:if="${#lists.size(post.images) == 1}">
                                     <a th:href="@{/post/{id}(id=${post.id})}" class="block">
                                         <img th:src="@{'/uploads/' + ${post.images[0].imageUrl}}" alt="Post image"
@@ -561,7 +562,7 @@
                                     </a>
                                 </div>
                             
-                                <!-- 2 ảnh: Grid 2 cột -->
+                                <!-- 2 áº£nh: Grid 2 cá»™t -->
                                 <div th:if="${#lists.size(post.images) == 2}" class="grid grid-cols-2 gap-0.5">
                                     <a th:each="img : ${post.images}" th:href="@{/post/{id}(id=${post.id})}"
                                         class="relative overflow-hidden aspect-square block">
@@ -570,15 +571,15 @@
                                     </a>
                                 </div>
                             
-                                <!-- 3 ảnh: 1 lớn bên trái + 2 nhỏ bên phải -->
+                                <!-- 3 áº£nh: 1 lá»›n bÃªn trÃ¡i + 2 nhá» bÃªn pháº£i -->
                                 <div th:if="${#lists.size(post.images) == 3}" class="grid grid-cols-2 gap-0.5">
-                                    <!-- Ảnh đầu tiên chiếm full height bên trái -->
+                                    <!-- áº¢nh Ä‘áº§u tiÃªn chiáº¿m full height bÃªn trÃ¡i -->
                                     <a th:href="@{/post/{id}(id=${post.id})}" class="relative overflow-hidden row-span-2 block">
                                         <img th:src="@{'/uploads/' + ${post.images[0].imageUrl}}" alt="Post image"
                                             class="w-full h-full object-cover cursor-pointer hover:opacity-95 transition">
                                     </a>
                             
-                                    <!-- 2 ảnh còn lại xếp dọc bên phải -->
+                                    <!-- 2 áº£nh cÃ²n láº¡i xáº¿p dá»c bÃªn pháº£i -->
                                     <div class="grid grid-rows-2 gap-0.5">
                                         <a th:href="@{/post/{id}(id=${post.id})}" class="relative overflow-hidden block">
                                             <img th:src="@{'/uploads/' + ${post.images[1].imageUrl}}" alt="Post image"
@@ -591,14 +592,14 @@
                                     </div>
                                 </div>
                             
-                                <!-- 4+ ảnh: Grid 2x2 -->
+                                <!-- 4+ áº£nh: Grid 2x2 -->
                                 <div th:if="${#lists.size(post.images) >= 4}" class="grid grid-cols-2 gap-0.5">
                                     <a th:each="img, iter : ${post.images}" th:if="${iter.index < 4}" th:href="@{/post/{id}(id=${post.id})}"
                                         class="relative overflow-hidden aspect-square block">
                                         <img th:src="@{'/uploads/' + ${img.imageUrl}}" alt="Post image"
                                             class="w-full h-full object-cover cursor-pointer hover:opacity-95 transition">
                             
-                                        <!-- Overlay nếu có nhiều hơn 4 ảnh -->
+                                        <!-- Overlay náº¿u cÃ³ nhiá»u hÆ¡n 4 áº£nh -->
                                         <div th:if="${iter.index == 3 && #lists.size(post.images) > 4}"
                                             class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center pointer-events-none">
                                             <span class="text-white text-3xl font-semibold"
@@ -756,7 +757,7 @@
                 <form id="shareForm">
                     <textarea id="shareNote" name="note" rows="4"
                         class="w-full border rounded-lg p-3 focus:outline-none focus:ring"
-                        placeholder="Viết gì đó khi chia sẻ (có thể để trống)"></textarea>
+                        placeholder="Viết gì đó khi chia sẻ"></textarea>
                     <div class="flex justify-end gap-3 mt-4">
                         <button type="button" onclick="closeShareModal()"
                             class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">Hủy</button>
@@ -885,7 +886,7 @@
                 })
                 .catch(err => {
                     console.error(err);
-                    alert('Bạn cần đăng nhập để thực hiện hành động này!');
+                    alert('Bạn vui lòng đăng nhập!');
                 });
         }
 
@@ -921,12 +922,12 @@
             const label = postDiv.querySelector('.reaction-label');
 
             const map = {
-                LIKE: { icon: '/reactions/like.png', label: 'Thích', color: 'text-blue-600' },
-                LOVE: { icon: '/reactions/love.png', label: 'Yêu thích', color: 'text-red-600' },
+                LIKE: { icon: '/reactions/like.png', label: 'ThÃ­ch', color: 'text-blue-600' },
+                LOVE: { icon: '/reactions/love.png', label: 'YÃªu thÃ­ch', color: 'text-red-600' },
                 HAHA: { icon: '/reactions/haha.png', label: 'Haha', color: 'text-yellow-600' },
                 WOW: { icon: '/reactions/wow.png', label: 'Wow', color: 'text-yellow-600' },
-                SAD: { icon: '/reactions/sad.png', label: 'Buồn', color: 'text-yellow-600' },
-                ANGRY: { icon: '/reactions/angry.png', label: 'Phẫn nộ', color: 'text-orange-600' }
+                SAD: { icon: '/reactions/sad.png', label: 'Buá»“n', color: 'text-yellow-600' },
+                ANGRY: { icon: '/reactions/angry.png', label: 'Pháº«n ná»™', color: 'text-orange-600' }
             };
 
             if (newReaction && map[newReaction]) {
@@ -935,7 +936,7 @@
                 label.className = `reaction-label text-[15px] font-semibold ${map[newReaction].color}`;
             } else {
                 icon.src = '/reactions/non-reaction.png';
-                label.textContent = 'Thích';
+                label.textContent = 'ThÃ­ch';
                 label.className = 'reaction-label text-[15px] font-medium text-gray-600';
             }
 
@@ -965,7 +966,7 @@
                 menu.classList.toggle('hidden');
             }
 
-            // Tắt menu khi click ra ngoài
+            // Táº¯t menu khi click ra ngoÃ i
             document.addEventListener("click", () => {
                 document.querySelectorAll(".post-menu").forEach(menu => menu.classList.add("hidden"));
             });
@@ -1046,7 +1047,7 @@
                 shareForm.addEventListener('submit', function (e) {
                     e.preventDefault();
                     if (!sharePostId) {
-                        alert('Không xác định bài viết');
+                        alert('KhÃ´ng xÃ¡c Ä‘á»‹nh bÃ i viáº¿t');
                         return;
                     }
                     const note = document.getElementById('shareNote')?.value || '';
@@ -1062,7 +1063,7 @@
                             if (data.success) {
                                 location.reload();
                             } else {
-                                alert(data.message || 'Không thể chia sẻ bài viết');
+                                alert(data.message || 'Không thành công');
                             }
                         })
                         .catch(() => alert('Vui lòng đăng nhập'))
@@ -1078,7 +1079,7 @@
                 modal.className = 'fixed inset-0 bg-black/70 hidden items-center justify-center z-50';
                 modal.innerHTML = `
                     <div class="relative w-full max-w-5xl px-4">
-                        <button onclick="closeVideoModal()" class="absolute -top-10 right-0 text-white text-2xl">×</button>
+                        <button onclick="closeVideoModal()" class="absolute -top-10 right-0 text-white text-2xl">Ã—</button>
                         <video id="videoPlayer" class="w-full max-h-[80vh] rounded-lg bg-black" controls autoplay></video>
                     </div>
                 `;

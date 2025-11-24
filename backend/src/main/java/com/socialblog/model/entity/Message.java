@@ -19,6 +19,10 @@ public class Message extends BaseEntity {
     @Column(name = "image_url")
     private String imageUrl;
 
+    // Tin nhắn đã đọc hay chưa
+    @Column(name = "is_read")
+    private boolean isRead = false;
+
     // ===== Quan hệ với người gửi =====
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)

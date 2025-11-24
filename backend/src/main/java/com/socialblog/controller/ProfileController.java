@@ -159,6 +159,21 @@ public class ProfileController {
         return "User/videos";
     }
 
+    // =================== TRANG BẠN BÈ ===================
+    @GetMapping("/user/{id}/friends")
+    public String viewUserFriends(@PathVariable Long id, Model model, HttpSession session) {
+        User profileUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserDTO currentUser = (UserDTO) session.getAttribute("currentUser");
+        List<User> friends = friendshipService.listFriends(id);
+
+        model.addAttribute("profileUser", profileUser);
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("friends", friends);
+        return "User/friend";
+    }
+
     // =================== TRANG XEM TẤT CẢ ẢNH ===================
     @GetMapping("/user/{id}/photos")
     public String viewUserPhotos(@PathVariable Long id, Model model, HttpSession session) {

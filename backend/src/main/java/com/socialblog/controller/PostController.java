@@ -46,7 +46,7 @@ public class PostController {
         model.addAttribute("post", new PostRequest());
         model.addAttribute("visibilities", Visibility.values());
         model.addAttribute("currentUser", currentUser);
-        return "Post/create"; // nhớ tạo file Post/create.html
+        return "Post/create";
     }
 
     // XỬ LÝ SUBMIT FORM TẠO BÀI
@@ -175,6 +175,7 @@ public class PostController {
         ra.addFlashAttribute("success", "Xóa bài viết thành công");
         return "redirect:/";
     }
+
     // CHIA SẺ / REPOST
     @PostMapping("/{id}/repost")
     @ResponseBody

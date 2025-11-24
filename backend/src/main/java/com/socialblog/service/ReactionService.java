@@ -4,133 +4,91 @@ import com.socialblog.dto.ReactionRequest;
 import com.socialblog.model.entity.Post;
 import com.socialblog.model.entity.Reaction;
 import com.socialblog.model.entity.User;
-import com.socialblog.model.enums.ReactionType;
 import com.socialblog.repository.PostRepository;
 import com.socialblog.repository.ReactionRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class ReactionService {
 
-        private final ReactionRepository reactionRepository;
-        private final PostRepository postRepository;
+    private final ReactionRepository reactionRepository;
+    private final PostRepository postRepository;
 
-        /**
-         * Thêm hoặc cập nhật reaction
-         * - Nếu chưa có reaction → Tạo mới
-         * - Nếu đã có reaction khác → Đổi sang reaction mới
-         * - Nếu click lại reaction cũ → Xóa reaction (toggle)
-         */
-        @Transactional
-        public long addOrUpdateReaction(ReactionRequest request, User user) {
+    // Thêm hoặc cập nhật reaction (toggle)
+    @Transactional
+    public long addOrUpdateReaction(ReactionRequest request, User user) {
+        Post post = postRepository.findById(request.getPostId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết!"));
 
-                // Tìm post
-                Post post = postRepository.findById(request.getPostId())
-                                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết!"));
+        Reaction existingReaction = reactionRepository.findByPostAndUser(post, user).orElse(null);
 
-                // Tìm reaction hiện tại của user cho post này
-                Reaction existingReaction = reactionRepository
-                                .findByPostAndUser(post, user)
-                                .orElse(null);
-
-                if (existingReaction != null) {
-                        // Đã có reaction
-                        if (existingReaction.getType() == request.getType()) {
-                                // Click lại reaction cũ → XÓA (toggle off)
-                                log.info("🗑️ Removing existing reaction (toggle off)");
-                                reactionRepository.delete(existingReaction);
-                        } else {
-                                // Đổi sang reaction khác
-                                log.info("🔄 Changing reaction from {} to {}",
-                                                existingReaction.getType(), request.getType());
-                                existingReaction.setType(request.getType());
-                                reactionRepository.save(existingReaction);
-                        }
-                } else {
-                        // Chưa có reaction → Tạo mới
-                        log.info("➕ Creating new reaction");
-                        Reaction newReaction = Reaction.builder()
-                                        .post(post)
-                                        .user(user)
-                                        .type(request.getType())
-                                        .build();
-                        reactionRepository.save(newReaction);
-                }
-
-                // Cập nhật tổng số reaction của post
-                long totalReactions = reactionRepository.countByPost(post);
-                post.setLikeCount((int) totalReactions);
-                postRepository.save(post);
-
-                log.info("✅ Reaction processed - Total reactions: {}", totalReactions);
-
-                return totalReactions;
+        if (existingReaction != null) {
+            if (existingReaction.getType() == request.getType()) {
+                // Toggle off
+                reactionRepository.delete(existingReaction);
+            } else {
+                existingReaction.setType(request.getType());
+                reactionRepository.save(existingReaction);
+            }
+        } else {
+            Reaction newReaction = Reaction.builder()
+                    .post(post)
+                    .user(user)
+                    .type(request.getType())
+                    .build();
+            reactionRepository.save(newReaction);
         }
 
-        /**
-         * Xóa reaction
-         */
-        @Transactional
-        public long removeReaction(Long postId, User user) {
+        long totalReactions = reactionRepository.countByPost(post);
+        post.setLikeCount((int) totalReactions);
+        postRepository.save(post);
+        return totalReactions;
+    }
 
-                log.info("🗑️ Removing reaction - User: {}, Post: {}", user.getId(), postId);
+    // Xóa reaction
+    @Transactional
+    public long removeReaction(Long postId, User user) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết!"));
 
-                // Tìm post
-                Post post = postRepository.findById(postId)
-                                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết!"));
+        reactionRepository.findByPostAndUser(post, user)
+                .ifPresent(reactionRepository::delete);
 
-                // Tìm và xóa reaction
-                reactionRepository.findByPostAndUser(post, user)
-                                .ifPresent(reaction -> {
-                                        log.info("🗑️ Deleting reaction type: {}", reaction.getType());
-                                        reactionRepository.delete(reaction);
-                                });
+        long totalReactions = reactionRepository.countByPost(post);
+        post.setLikeCount((int) totalReactions);
+        postRepository.save(post);
+        return totalReactions;
+    }
 
-                // Cập nhật tổng số reaction của post
-                long totalReactions = reactionRepository.countByPost(post);
-                post.setLikeCount((int) totalReactions);
-                postRepository.save(post);
+    public long countReactionsByPost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết!"));
+        return reactionRepository.countByPost(post);
+    }
 
-                log.info("✅ Reaction removed - Total reactions: {}", totalReactions);
+    public String getUserReactionForPost(Long postId, User user) {
+        return reactionRepository.findReactionType(postId, user.getId()).orElse(null);
+    }
 
-                return totalReactions;
-        }
+    public List<Reaction> getReactionsByPost(Post post) {
+        return reactionRepository.findAll().stream().filter(r -> r.getPost().equals(post)).toList();
+    }
 
-        /**
-         * Đếm tổng số reaction của một post
-         */
-        public long countReactionsByPost(Long postId) {
-                Post post = postRepository.findById(postId)
-                                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết!"));
-                return reactionRepository.countByPost(post);
-        }
+    // Top reactions
+    public List<ReactionCount> topReactions(Post post, int limit) {
+        List<Object[]> raw = reactionRepository.countGroupByType(post.getId());
+        return raw.stream()
+                .map(arr -> new ReactionCount((com.socialblog.model.enums.ReactionType) arr[0], (Long) arr[1]))
+                .sorted((a, b) -> Long.compare(b.count(), a.count()))
+                .limit(limit)
+                .toList();
+    }
 
-        /**
-         * Lấy reaction của user cho một post
-         */
-        public String getUserReactionForPost(Long postId, User user) {
-                return reactionRepository.findReactionType(postId, user.getId())
-                                .orElse(null);
-        }
-
-        /**
-         * Thống kê top các loại reaction trên một bài post
-         */
-        public List<ReactionCount> topReactions(Post post, int limit) {
-                return reactionRepository.countGroupByType(post.getId()).stream()
-                                .map(row -> new ReactionCount((ReactionType) row[0], (Long) row[1]))
-                                .sorted((a, b) -> Long.compare(b.count(), a.count()))
-                                .limit(limit)
-                                .toList();
-        }
-
-        public record ReactionCount(ReactionType type, long count) {
-        }
-
+    public record ReactionCount(com.socialblog.model.enums.ReactionType type, long count) {
+    }
 }

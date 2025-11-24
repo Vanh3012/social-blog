@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/userbase :: layout(
+          content = ~{::content},
+          script  = ~{::script}
+      )}">
+
+<!-- =================== CONTENT =================== -->
+<section th:fragment="content">
+
+    <div class="max-w-3xl mx-auto bg-white shadow-md rounded-lg p-4 mt-6">
+
+        <!-- HEADER -->
+        <div class="flex items-center border-b pb-3 mb-4">
+
+            <!-- Avatar -->
+            <img th:if="${partner.avatarUrl != null}" th:src="@{'/uploads_avatar/' + ${partner.avatarUrl}}"
+                class="w-10 h-10 rounded-full mr-3">
+
+            <div th:unless="${partner.avatarUrl != null}"
+                class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold mr-3">
+                <span th:text="${#strings.substring(partner.fullName, 0, 1)}"></span>
+            </div>
+
+            <!-- Tên người chat -->
+            <h2 class="text-xl font-semibold" th:text="${partner.fullName}"></h2>
+        </div>
+
+        <!-- KHUNG CHAT -->
+        <div id="chatBox" class="h-[500px] overflow-y-auto border p-4 mb-4 rounded bg-gray-50 flex flex-col gap-3">
+
+            <!-- Lặp mỗi tin nhắn -->
+            <div th:each="msg : ${messages}" class="flex flex-col">
+
+                <!-- Tin của mình -->
+                <div th:if="${msg.sender.id == currentUser.id}" class="flex flex-col items-end">
+                    <div class="max-w-[75%] bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-br-sm shadow">
+                        <span th:text="${msg.content}"></span>
+                    </div>
+
+                    <!-- Thời gian nhỏ -->
+                    <span class="text-[11px] text-gray-500 mt-1"
+                        th:text="${#temporals.format(msg.createdAt, 'HH:mm dd/MM')}">
+                    </span>
+                </div>
+
+
+                <!-- Tin của người kia -->
+                <div th:unless="${msg.sender.id == currentUser.id}" class="flex flex-col items-start">
+                    <div class="max-w-[75%] bg-gray-300 text-gray-900 px-4 py-2 rounded-2xl rounded-bl-sm shadow">
+                        <span th:text="${msg.content}"></span>
+                    </div>
+
+                    <!-- Thời gian nhỏ -->
+                    <span class="text-[11px] text-gray-500 mt-1"
+                        th:text="${#temporals.format(msg.createdAt, 'HH:mm dd/MM')}">
+                    </span>
+                </div>
+
+
+            </div>
+
+
+            <!-- FORM GỬI TIN -->
+            <form th:action="@{/messages/send}" method="post" class="flex gap-2">
+                <input type="hidden" name="conversationId" th:value="${conversation.id}">
+                <input type="hidden" name="receiverId" th:value="${partner.id}">
+
+                <input type="text" name="content"
+                    class="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Nhập tin nhắn..." required>
+
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700">
+                    Gửi
+                </button>
+            </form>
+
+        </div>
+
+</section>
+
+<!-- =================== SCRIPT =================== -->
+<section th:fragment="script">
+    <script>
+        // Tự scroll xuống cuối khi mở chat
+        const chatBox = document.getElementById("chatBox");
+        chatBox.scrollTop = chatBox.scrollHeight;
+    </script>
+</section>
+
+</html>

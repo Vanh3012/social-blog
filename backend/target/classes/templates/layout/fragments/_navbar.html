@@ -129,16 +129,175 @@
                     </svg>
                 </a>
 
+                <!-- Messages (Icon) -->
+                <div x-data="{
+                    messagesOpen: false,
+                    conversations: [],
+                    loadConversations() {
+                        fetch('/messages/list')
+                            .then(res => res.json())
+                            .then(data => {
+                                this.conversations = data;   // API trả về array
+                            });
+                    }
+                }" @click.away="messagesOpen = false" class="relative">
+                
+                    <!-- Icon -->
+                    <a @click="messagesOpen = !messagesOpen; loadConversations()"
+                        class="hidden sm:flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full cursor-pointer">
+                
+                        <svg width="22" height="22" fill="currentColor" class="text-gray-700">
+                            <path d="M2 3h20v14H6l-4 4V3z"></path>
+                        </svg>
+                    </a>
+                
+                    <!-- Dropdown -->
+                    <div x-show="messagesOpen" x-transition
+                        class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border max-h-96 overflow-y-auto"
+                        style="display: none">
+                
+                        <!-- Empty -->
+                        <template x-if="conversations.length === 0">
+                            <p class="text-center text-gray-500 p-4">Chưa có tin nhắn</p>
+                        </template>
+                
+                        <!-- List -->
+                        <template x-for="c in conversations" :key="c.conversationId">
+                            <a :href="'/messages/user/' + c.partnerId"
+                                class="flex items-center gap-3 p-3 hover:bg-gray-100 transition cursor-pointer">
+                
+                                <!-- Avatar -->
+                                <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center"
+                                    x-text="c.partnerName.charAt(0)">
+                                </div>
+                
+                                <div class="flex-1">
+                                    <p class="font-semibold" x-text="c.partnerName"></p>
+                
+                                    <p class="text-xs truncate" :class="c.unread > 0 ? 'font-semibold text-gray-900' : 'text-gray-500'"
+                                        x-text="c.lastMessage">
+                                    </p>
+                                </div>
+                
+                                <!-- Chấm xanh chưa đọc -->
+                                <template x-if="c.unread > 0">
+                                    <span class="w-2 h-2 bg-blue-600 rounded-full"></span>
+                                </template>
+                
+                            </a>
+                        </template>
+                    </div>
+                </div>
+
                 <!-- Notifications (Icon) -->
-                <button
-                    class="hidden sm:flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full hover:bg-gray-200 transition-smooth relative">
-                    <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
-                        </path>
-                    </svg>
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
+                <div x-data="{
+                                    notificationsOpen: false,
+                                    notifications: [],
+                                    unreadCount: 0,
+                                    loadNotifications() {
+                                        fetch('/notifications/unread')
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                if(data.success) {
+                                                    this.notifications = data.notifications;
+                                                    this.unreadCount = data.notifications.filter(n => !n.read).length;
+                                                }
+                                            });
+                                    }
+                                }" @click.away="notificationsOpen = false" class="relative">
+                
+                    <!-- Bell Icon Button -->
+                    <a @click="notificationsOpen = !notificationsOpen; loadNotifications()"
+                        class="hidden sm:flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full hover:bg-gray-200 transition-smooth relative group cursor-pointer">
+                        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                            </path>
+                        </svg>
+                
+                        <!-- Badge số thông báo chưa đọc -->
+                        <span th:if="${currentUser}" :class="unreadCount > 0 ? 'bg-red-500' : 'bg-gray-300'"
+                            class="absolute top-1 right-1 w-2 h-2 rounded-full transition"></span>
+                
+                        <!-- Tooltip -->
+                        <span
+                            class="absolute bottom-full mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            Thông báo
+                        </span>
+                    </a>
+                
+                    <!-- Notification Dropdown (Kiểu Facebook) -->
+                    <div x-show="notificationsOpen" x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100"
+                        x-transition:leave-end="transform opacity-0 scale-95"
+                        class="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 max-h-96 overflow-y-auto"
+                        style="display: none;">
+                
+                        <!-- Header -->
+                        <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
+                            <h3 class="font-bold text-gray-900">Thông báo</h3>
+                            <a href="/notifications" class="text-blue-600 text-sm hover:underline">Xem tất cả</a>
+                        </div>
+                
+                        <!-- Notifications List -->
+                        <div th:if="${currentUser}">
+                            <!-- Nếu có thông báo -->
+                            <template x-if="notifications.length > 0">
+                                <div>
+                                    <template x-for="notif in notifications.slice(0, 5)" :key="notif.id">
+                                        <div :class="notif.read ? '' : 'bg-blue-50'"
+                                            class="border-b border-gray-100 p-3 hover:bg-gray-50 transition cursor-pointer"
+                                            @click="window.location.href = notif.postId ? '/post/' + notif.postId : '/notifications'">
+                                            <div class="flex gap-3">
+                                                <!-- Icon theo type -->
+                                                <div class="flex-shrink-0">
+                                                    <span x-show="notif.type === 'COMMENT'" class="text-xl">💬</span>
+                                                    <span x-show="notif.type === 'LIKE'" class="text-xl">❤️</span>
+                                                    <span x-show="notif.type === 'FRIEND_REQUEST'" class="text-xl">👥</span>
+                                                    <span x-show="notif.type === 'MESSAGE'" class="text-xl">✉️</span>
+                                                </div>
+                
+                                                <!-- Content -->
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-sm text-gray-900" x-text="notif.message"></p>
+                                                    <p class="text-xs text-gray-500 mt-1" x-text="new Date(notif.createdAt).toLocaleString('vi-VN', {
+                                                            year: 'numeric',
+                                                            month: '2-digit',
+                                                            day: '2-digit',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })"></p>
+                                                </div>
+                
+                                                <!-- Unread indicator -->
+                                                <div x-show="!notif.read" class="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-1">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                
+                            <!-- Nếu không có thông báo -->
+                            <template x-if="notifications.length === 0">
+                                <div class="p-8 text-center text-gray-500">
+                                    <div class="text-3xl mb-2">🔔</div>
+                                    <p class="text-sm">Không có thông báo</p>
+                                </div>
+                            </template>
+                        </div>
+                
+                        <!-- Footer -->
+                        <template x-if="notifications.length > 0">
+                            <div class="border-t border-gray-200 p-3 text-center">
+                                <a href="/notifications" class="text-blue-600 text-sm font-medium hover:underline">
+                                    Xem tất cả thông báo
+                                </a>
+                            </div>
+                        </template>
+                    </div>
+                </div>
 
                 <!-- User Menu -->
                 <div x-data="{ open: false }" class="relative">

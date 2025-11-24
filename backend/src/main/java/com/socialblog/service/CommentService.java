@@ -9,6 +9,7 @@ import com.socialblog.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
+import com.socialblog.service.NotificationService;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ import java.util.List;
 @Transactional
 public class CommentService {
 
+    private final NotificationService notificationService;
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
 
@@ -44,6 +46,7 @@ public class CommentService {
         // cập nhật số comment cho bài viết
         post.setCommentCount(post.getCommentCount() + 1);
         postRepository.save(post);
+        notificationService.createCommentNotification(post.getAuthor(), author, saved);
 
         return saved;
     }
@@ -53,6 +56,7 @@ public class CommentService {
         return commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
     }
 
+    // ====================== XÓA COMMENT ======================
     public void deleteComment(Long commentId, Long currentUserId) {
 
         Comment comment = commentRepository.findById(commentId)

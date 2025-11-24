@@ -32,7 +32,7 @@ public class AuthService {
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
-                .password(request.getPassword()) 
+                .password(request.getPassword())
                 .fullName(request.getFullName())
                 .role(Role.USER)
                 .active(true)
@@ -49,7 +49,7 @@ public class AuthService {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("Username hoặc password không đúng!"));
 
-        // Kiểm tra password (so sánh trực tiếp)
+        // Kiểm tra password
         if (!user.getPassword().equals(request.getPassword())) {
             throw new RuntimeException("Username hoặc password không đúng!");
         }
@@ -62,18 +62,21 @@ public class AuthService {
         return convertToDTO(user);
     }
 
+    // Lấy thông tin user theo ID
     public UserDTO getUserById(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user!"));
         return convertToDTO(user);
     }
 
+    // Lấy thông tin user theo username
     public UserDTO getUserByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user!"));
         return convertToDTO(user);
     }
 
+    // Chuyển đổi từ Entity sang DTO
     private UserDTO convertToDTO(User user) {
         return UserDTO.builder()
                 .id(user.getId())

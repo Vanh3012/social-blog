@@ -1,62 +1,41 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-    th:with="pageTitle='Tìm người dùng', content='this :: content'" 
-    th:replace="~{layout/base :: layout(~{::content})}">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/userbase :: layout(~{::content}, ~{::script})}">
 
 <body>
-    <section th:fragment="content">
-        <div class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-            <h1 class="text-lg font-semibold mb-4">🔍 Tìm người dùng</h1>
-
-            <form method="get" action="/friend/search" class="flex items-center gap-2 mb-6">
-                <input type="text" name="keyword" th:value="${keyword}" placeholder="Nhập tên hoặc username..."
-                    class="flex-1 rounded-xl border border-neutral-300 px-3 py-2 focus:ring-2 focus:ring-neutral-900" />
-                <button type="submit"
-                    class="rounded-lg bg-neutral-900 text-white px-4 py-2.5 hover:bg-black whitespace-nowrap">
-                    Tìm kiếm
-                </button>
-            </form>
-
-            <div class="divide-y divide-neutral-200" th:if="${users != null and !#lists.isEmpty(users)}">
-                <div th:each="u : ${users}" class="py-4 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-neutral-900 to-neutral-600 flex items-center justify-center text-white font-semibold text-lg"
-                            th:text="${u.fullName != null ? #strings.substring(u.fullName, 0, 1) : 'U'}">
-                            U
-                        </div>
-                        <div>
-                            <div class="font-medium" th:text="${u.fullName ?: u.username}">User</div>
-                            <div class="text-xs text-neutral-500" th:text="${u.email}">email</div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <a th:href="@{|/user/${u.id}|}"
-                            class="rounded-lg border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-100">
-                            Xem trang
-                        </a>
-                        <form th:action="@{|/friend/request/${u.id}|}" method="post">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <button type="submit"
-                                class="rounded-lg bg-neutral-900 text-white px-3 py-1.5 text-sm hover:bg-black">
-                                Kết bạn
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <div th:if="${users == null}" class="text-center text-neutral-500 py-16">
-                <div class="text-4xl mb-2">🔍</div>
-                <p>Nhập từ khóa để tìm kiếm người dùng.</p>
-            </div>
-
-            <div th:if="${users != null and #lists.isEmpty(users)}" class="text-center text-neutral-500 py-16">
-                <div class="text-4xl mb-2">😕</div>
-                <p>Không tìm thấy người dùng phù hợp.</p>
-                <p class="text-sm mt-2">Thử tìm kiếm với từ khóa khác</p>
+<section th:fragment="content" class="max-w-5xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <p class="text-sm text-gray-500" th:text="'@' + ${profileUser.username}">username</p>
+                <h1 class="text-2xl font-bold text-gray-900">Bạn bè</h1>
+                <p class="text-sm text-gray-500" th:text="${#lists.size(friends)} + ' người bạn'">0 người bạn</p>
             </div>
         </div>
-    </section>
-</body>
 
+        <div th:if="${#lists.isEmpty(friends)}" class="text-center text-gray-500 py-16">
+            Chưa có bạn bè để hiển thị.
+        </div>
+
+        <div th:unless="${#lists.isEmpty(friends)}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <a th:each="f : ${friends}" th:href="@{/user/{id}(id=${f.id})}"
+               class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:shadow-sm transition">
+                <img th:if="${f.avatarUrl != null}" th:src="@{'/uploads_avatar/' + ${f.avatarUrl}}"
+                     class="w-12 h-12 rounded-full object-cover">
+                <div th:unless="${f.avatarUrl != null}"
+                     class="w-12 h-12 rounded-full bg-blue-500 text-white font-semibold flex items-center justify-center">
+                    <span th:text="${#strings.substring(f.fullName,0,1).toUpperCase()}">U</span>
+                </div>
+                <div>
+                    <div class="font-semibold text-gray-900" th:text="${f.fullName}">Họ tên</div>
+                    <div class="text-sm text-gray-500" th:text="'@' + ${f.username}">@username</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section th:fragment="script">
+</section>
+</body>
 </html>

@@ -3,6 +3,7 @@ com\socialblog\model\entity\User.class
 com\socialblog\controller\AuthController.class
 com\socialblog\model\entity\Reaction.class
 com\socialblog\service\ReactionService$ReactionCount.class
+com\socialblog\controller\NotificationController.class
 com\socialblog\dto\LoginRequest$LoginRequestBuilder.class
 com\socialblog\service\PostService.class
 com\socialblog\model\entity\PostVideo$PostVideoBuilder.class
@@ -17,6 +18,7 @@ com\socialblog\repository\FriendshipRepository.class
 com\socialblog\SocialblogApplication.class
 com\socialblog\controller\ProfileController.class
 com\socialblog\model\enums\NotificationType.class
+com\socialblog\service\MessageService.class
 com\socialblog\service\FriendshipService$1.class
 com\socialblog\model\enums\ConversationType.class
 com\socialblog\model\entity\User$UserBuilder.class
@@ -27,6 +29,7 @@ com\socialblog\controller\ReactionController.class
 com\socialblog\dto\UserDTO$UserDTOBuilder.class
 com\socialblog\model\entity\Post.class
 com\socialblog\repository\UserRepository.class
+com\socialblog\repository\ConversationMemberRepository.class
 com\socialblog\model\entity\Comment.class
 com\socialblog\service\AuthService.class
 com\socialblog\config\WebConfig.class
@@ -35,6 +38,7 @@ com\socialblog\model\BaseEntity.class
 com\socialblog\model\enums\Gender.class
 com\socialblog\model\entity\Notification.class
 com\socialblog\dto\RegisterRequest.class
+com\socialblog\controller\ChatController.class
 com\socialblog\model\entity\Post$PostBuilder.class
 com\socialblog\config\AuthInterceptor.class
 com\socialblog\config\AppConfig.class
@@ -54,12 +58,15 @@ com\socialblog\dto\PostDTO.class
 com\socialblog\dto\PostRequest.class
 com\socialblog\model\entity\Comment$CommentBuilder.class
 com\socialblog\service\ProfileService.class
+com\socialblog\service\ConversationService.class
 com\socialblog\dto\CommentDTO.class
 com\socialblog\repository\PostVideoRepository.class
 com\socialblog\model\entity\Report$ReportBuilder.class
 com\socialblog\model\entity\ConversationMember.class
 com\socialblog\dto\LoginRequest.class
+com\socialblog\repository\ConversationRepository.class
 com\socialblog\model\entity\Conversation.class
+com\socialblog\repository\MessageRepository.class
 com\socialblog\model\enums\ReportStatus.class
 com\socialblog\repository\PostRepository.class
 com\socialblog\dto\CommentRequest.class

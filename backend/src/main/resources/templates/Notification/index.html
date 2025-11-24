@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-    th:with="pageTitle='Thông báo', content='this :: content'" 
-    th:replace="~{layout/base :: layout(~{::content})}">
+    th:with="pageTitle='Thông báo', content='this :: content'"
+    th:replace="~{layout/userbase :: layout(~{::content}, ~{::script})}">
 
 <body>
     <section th:fragment="content">
@@ -63,6 +63,18 @@
             </div>
         </div>
     </section>
+
+    <th:block th:fragment="script">
+        <script>
+            document.querySelectorAll('[data-confirm]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (!confirm(btn.dataset.confirm)) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        </script>
+    </th:block>
 </body>
 
 </html>
