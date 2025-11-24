@@ -16,4 +16,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Modifying
     @Query("UPDATE Message m SET m.isRead = true WHERE m.conversation.id = :conversationId AND m.sender.id <> :userId")
     void markMessagesAsRead(@Param("conversationId") Long conversationId, @Param("userId") Long userId);
+
+    Long countByConversation_IdAndIsReadFalseAndSender_IdNot(Long conversationId, Long userId);
 }

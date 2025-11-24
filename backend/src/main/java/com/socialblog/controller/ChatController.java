@@ -1,4 +1,4 @@
-package com.socialblog.controller;
+﻿package com.socialblog.controller;
 
 import com.socialblog.model.entity.ConversationMember;
 import com.socialblog.dto.UserDTO;
@@ -7,6 +7,7 @@ import com.socialblog.model.entity.Message;
 import com.socialblog.model.entity.User;
 import com.socialblog.service.ConversationService;
 import com.socialblog.service.MessageService;
+import com.socialblog.repository.MessageRepository;
 import com.socialblog.repository.UserRepository;
 
 import jakarta.servlet.http.HttpSession;
@@ -27,9 +28,10 @@ public class ChatController {
 
     private final ConversationService conversationService;
     private final MessageService messageService;
+    private final MessageRepository messageRepository;
     private final UserRepository userRepository;
 
-    // ======================= MỞ CHAT =======================
+    // ======================= Má»ž CHAT =======================
     @GetMapping("/user/{partnerId}")
     public String openChatWithUser(@PathVariable Long partnerId,
             HttpSession session,
@@ -45,6 +47,7 @@ public class ChatController {
         Conversation conversation = conversationService.getOrCreatePrivateConversation(currentUserId, partnerId);
 
         List<Message> messages = messageService.getMessagesByConversation(conversation.getId());
+        messageService.markMessagesAsRead(conversation.getId(), currentUserId);
 
         User partner = userRepository.findById(partnerId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -57,7 +60,7 @@ public class ChatController {
         return "Message/chat";
     }
 
-    // ======================= GỬI TIN NHẮN =======================
+    // ======================= Gá»¬I TIN NHáº®N =======================
     @PostMapping("/send")
     public String sendMessage(@RequestParam Long conversationId,
             @RequestParam Long receiverId,
@@ -79,7 +82,7 @@ public class ChatController {
         return "redirect:/messages/user/" + receiverId;
     }
 
-    // ======================= LẤY DANH SÁCH CHAT =======================
+    // ======================= Láº¤Y DANH SÃCH CHAT =======================
     @GetMapping("/list")
     @ResponseBody
     public Object getConversations(HttpSession session) {
@@ -94,7 +97,7 @@ public class ChatController {
                 .stream()
                 .map(conv -> {
 
-                    // ---- Lấy partner ----
+                    // ---- Láº¥y partner ----
                     ConversationMember partnerMember = conv.getMembers()
                             .stream()
                             .filter(m -> !m.getUser().getId().equals(userId))
@@ -103,7 +106,7 @@ public class ChatController {
 
                     User partner = partnerMember != null ? partnerMember.getUser() : null;
 
-                    // ---- Lấy tin nhắn cuối ----
+                    // ---- Láº¥y tin nháº¯n cuá»‘i ----
                     Message lastMsg = conv.getMessages().isEmpty()
                             ? null
                             : conv.getMessages().get(conv.getMessages().size() - 1);
@@ -112,10 +115,13 @@ public class ChatController {
                             "conversationId", conv.getId(),
                             "partnerId", partner != null ? partner.getId() : null,
                             "partnerName", partner != null ? partner.getFullName() : "Unknown",
+                            "partnerAvatar", partner != null ? partner.getAvatarUrl() : null,
                             "lastMessage", lastMsg != null ? lastMsg.getContent() : "",
+                            "unread", messageRepository.countByConversation_IdAndIsReadFalseAndSender_IdNot(conv.getId(), userId),
                             "updatedAt", conv.getUpdatedAt().toString());
                 })
                 .toList();
     }
 
 }
+

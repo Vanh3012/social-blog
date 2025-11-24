@@ -39,7 +39,8 @@ public class NotificationService {
             Notification notification = new Notification();
             notification.setReceiver(postAuthor);
             notification.setUser(commenter);
-            notification.setMessage(commenter.getUsername() + " đã bình luận bài viết của bạn");
+            String displayName = commenter.getFullName() != null ? commenter.getFullName() : commenter.getUsername();
+            notification.setMessage(displayName + " đã bình luận bài viết của bạn");
             notification.setType(NotificationType.COMMENT);
             notification.setPost(comment.getPost());
             notification.setComment(comment);
@@ -73,7 +74,8 @@ public class NotificationService {
             Notification notification = new Notification();
             notification.setReceiver(postAuthor);
             notification.setUser(reactor);
-            notification.setMessage(reactor.getUsername() + " đã thích bài viết của bạn");
+            String displayName = reactor.getFullName() != null ? reactor.getFullName() : reactor.getUsername();
+            notification.setMessage(displayName + " đã thích bài viết của bạn");
             notification.setType(NotificationType.LIKE);
             notification.setPost(post);
             notification.setRead(false);

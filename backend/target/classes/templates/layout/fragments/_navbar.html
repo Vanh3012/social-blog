@@ -164,12 +164,19 @@
                         <!-- List -->
                         <template x-for="c in conversations" :key="c.conversationId">
                             <a :href="'/messages/user/' + c.partnerId"
-                                class="flex items-center gap-3 p-3 hover:bg-gray-100 transition cursor-pointer">
-                
+                                class="flex items-center gap-3 p-3 transition cursor-pointer"
+                                :class="c.unread > 0 ? 'bg-gray-100' : 'hover:bg-gray-100'">
+
                                 <!-- Avatar -->
-                                <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center"
-                                    x-text="c.partnerName.charAt(0)">
-                                </div>
+                                <template x-if="c.partnerAvatar">
+                                    <img :src="'/uploads_avatar/' + c.partnerAvatar"
+                                         class="w-10 h-10 rounded-full object-cover border border-gray-200">
+                                </template>
+                                <template x-if="!c.partnerAvatar">
+                                    <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center"
+                                        x-text="c.partnerName.charAt(0)">
+                                    </div>
+                                </template>
                 
                                 <div class="flex-1">
                                     <p class="font-semibold" x-text="c.partnerName"></p>
@@ -178,12 +185,12 @@
                                         x-text="c.lastMessage">
                                     </p>
                                 </div>
-                
+
                                 <!-- Chấm xanh chưa đọc -->
                                 <template x-if="c.unread > 0">
                                     <span class="w-2 h-2 bg-blue-600 rounded-full"></span>
                                 </template>
-                
+
                             </a>
                         </template>
                     </div>
@@ -203,6 +210,10 @@
                                                     this.unreadCount = data.notifications.filter(n => !n.read).length;
                                                 }
                                             });
+                                    },
+                                    markAsRead(id) {
+                                        fetch('/notifications/read/' + id, { method: 'POST' })
+                                            .then(() => this.loadNotifications());
                                     }
                                 }" @click.away="notificationsOpen = false" class="relative">
                 
@@ -246,9 +257,9 @@
                             <template x-if="notifications.length > 0">
                                 <div>
                                     <template x-for="notif in notifications.slice(0, 5)" :key="notif.id">
-                                        <div :class="notif.read ? '' : 'bg-blue-50'"
-                                            class="border-b border-gray-100 p-3 hover:bg-gray-50 transition cursor-pointer"
-                                            @click="window.location.href = notif.postId ? '/post/' + notif.postId : '/notifications'">
+                                        <div :class="notif.read ? 'hover:bg-gray-50' : 'bg-blue-50 hover:bg-blue-100'"
+                                            class="border-b border-gray-100 p-3 transition cursor-pointer"
+                                            @click="markAsRead(notif.id); window.location.href = notif.postId ? '/post/' + notif.postId : '/notifications'">
                                             <div class="flex gap-3">
                                                 <!-- Icon theo type -->
                                                 <div class="flex-shrink-0">
@@ -328,7 +339,7 @@
                         <span th:if="${currentUser}">
                             <div class="px-4 py-2 border-b border-gray-100">
                                 <p class="text-sm font-semibold text-gray-800"
-                                    th:text="${currentUser.username}">User</p>
+                                    th:text="${currentUser.fullName}">fullName</p>
                                 <p class="text-xs text-gray-500" th:text="${currentUser.email}">
                                     email@example.com</p>
                             </div>
