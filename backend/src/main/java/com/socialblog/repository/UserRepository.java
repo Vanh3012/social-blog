@@ -4,6 +4,7 @@ import com.socialblog.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -20,5 +21,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByActiveTrue();
 
     // Search user by name or username
-    java.util.List<User> findByFullNameContainingIgnoreCaseOrUsernameContainingIgnoreCase(String name, String username);
+    List<User> findByFullNameContainingIgnoreCaseOrUsernameContainingIgnoreCase(String name, String username);
 }
