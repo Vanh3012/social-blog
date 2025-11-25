@@ -551,10 +551,10 @@
                                 </div>
                             </div>
 
-                            <!-- ============ HÃŒNH áº¢NH ============ -->
+                            <!-- ============ HÌNH ẢNH ============ -->
                             <div th:if="${post.images != null and !#lists.isEmpty(post.images)}" class="relative bg-black">
                             
-                                <!-- 1 áº£nh: Full width -->
+                                <!-- 1 ảnh: Full width -->
                                 <div th:if="${#lists.size(post.images) == 1}">
                                     <a th:href="@{/post/{id}(id=${post.id})}" class="block">
                                         <img th:src="@{'/uploads/' + ${post.images[0].imageUrl}}" alt="Post image"
@@ -562,7 +562,7 @@
                                     </a>
                                 </div>
                             
-                                <!-- 2 áº£nh: Grid 2 cá»™t -->
+                                <!-- 2 ảnh: Grid 2 cột -->
                                 <div th:if="${#lists.size(post.images) == 2}" class="grid grid-cols-2 gap-0.5">
                                     <a th:each="img : ${post.images}" th:href="@{/post/{id}(id=${post.id})}"
                                         class="relative overflow-hidden aspect-square block">
@@ -571,15 +571,15 @@
                                     </a>
                                 </div>
                             
-                                <!-- 3 áº£nh: 1 lá»›n bÃªn trÃ¡i + 2 nhá» bÃªn pháº£i -->
+                                <!-- 3 ảnh: 1 lớn bên trái + 2 nhỏ bên phải -->
                                 <div th:if="${#lists.size(post.images) == 3}" class="grid grid-cols-2 gap-0.5">
-                                    <!-- áº¢nh Ä‘áº§u tiÃªn chiáº¿m full height bÃªn trÃ¡i -->
+                                    <!-- Ảnh đầu tiên chiếm full height bên trái -->
                                     <a th:href="@{/post/{id}(id=${post.id})}" class="relative overflow-hidden row-span-2 block">
                                         <img th:src="@{'/uploads/' + ${post.images[0].imageUrl}}" alt="Post image"
                                             class="w-full h-full object-cover cursor-pointer hover:opacity-95 transition">
                                     </a>
                             
-                                    <!-- 2 áº£nh cÃ²n láº¡i xáº¿p dá»c bÃªn pháº£i -->
+                                    <!-- 2 ảnh còn lại xếp dọc bên phải -->
                                     <div class="grid grid-rows-2 gap-0.5">
                                         <a th:href="@{/post/{id}(id=${post.id})}" class="relative overflow-hidden block">
                                             <img th:src="@{'/uploads/' + ${post.images[1].imageUrl}}" alt="Post image"
@@ -592,14 +592,14 @@
                                     </div>
                                 </div>
                             
-                                <!-- 4+ áº£nh: Grid 2x2 -->
+                                <!-- 4+ ảnh: Grid 2x2 -->
                                 <div th:if="${#lists.size(post.images) >= 4}" class="grid grid-cols-2 gap-0.5">
                                     <a th:each="img, iter : ${post.images}" th:if="${iter.index < 4}" th:href="@{/post/{id}(id=${post.id})}"
                                         class="relative overflow-hidden aspect-square block">
                                         <img th:src="@{'/uploads/' + ${img.imageUrl}}" alt="Post image"
                                             class="w-full h-full object-cover cursor-pointer hover:opacity-95 transition">
                             
-                                        <!-- Overlay náº¿u cÃ³ nhiá»u hÆ¡n 4 áº£nh -->
+                                        <!-- Overlay nếu có nhiều hơn 4 ảnh -->
                                         <div th:if="${iter.index == 3 && #lists.size(post.images) > 4}"
                                             class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center pointer-events-none">
                                             <span class="text-white text-3xl font-semibold"
@@ -922,12 +922,12 @@
             const label = postDiv.querySelector('.reaction-label');
 
             const map = {
-                LIKE: { icon: '/reactions/like.png', label: 'ThÃ­ch', color: 'text-blue-600' },
-                LOVE: { icon: '/reactions/love.png', label: 'YÃªu thÃ­ch', color: 'text-red-600' },
+                LIKE: { icon: '/reactions/like.png', label: 'Thích', color: 'text-blue-600' },
+                LOVE: { icon: '/reactions/love.png', label: 'Yêu thích', color: 'text-red-600' },
                 HAHA: { icon: '/reactions/haha.png', label: 'Haha', color: 'text-yellow-600' },
                 WOW: { icon: '/reactions/wow.png', label: 'Wow', color: 'text-yellow-600' },
-                SAD: { icon: '/reactions/sad.png', label: 'Buá»“n', color: 'text-yellow-600' },
-                ANGRY: { icon: '/reactions/angry.png', label: 'Pháº«n ná»™', color: 'text-orange-600' }
+                SAD: { icon: '/reactions/sad.png', label: 'Buồn', color: 'text-yellow-600' },
+                ANGRY: { icon: '/reactions/angry.png', label: 'Phẫn nộ', color: 'text-orange-600' }
             };
 
             if (newReaction && map[newReaction]) {

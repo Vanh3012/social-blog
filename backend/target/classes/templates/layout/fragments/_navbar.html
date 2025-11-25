@@ -169,12 +169,16 @@
 
                                 <!-- Avatar -->
                                 <template x-if="c.partnerAvatar">
-                                    <img :src="'/uploads_avatar/' + c.partnerAvatar"
+                                    <img :src="c.partnerAvatar.startsWith('http')
+                                                ? c.partnerAvatar
+                                                : (c.partnerAvatar.includes('/uploads_avatar/')
+                                                    ? c.partnerAvatar
+                                                    : '/uploads_avatar/' + c.partnerAvatar)"
                                          class="w-10 h-10 rounded-full object-cover border border-gray-200">
                                 </template>
                                 <template x-if="!c.partnerAvatar">
                                     <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center"
-                                        x-text="c.partnerName.charAt(0)">
+                                        x-text="c.partnerName ? c.partnerName.charAt(0) : '?'">
                                     </div>
                                 </template>
                 

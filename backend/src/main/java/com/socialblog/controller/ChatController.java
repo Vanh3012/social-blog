@@ -1,4 +1,4 @@
-﻿package com.socialblog.controller;
+package com.socialblog.controller;
 
 import com.socialblog.model.entity.ConversationMember;
 import com.socialblog.dto.UserDTO;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,7 +32,7 @@ public class ChatController {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
 
-    // ======================= Má»ž CHAT =======================
+    // ======================= Mở chat =======================
     @GetMapping("/user/{partnerId}")
     public String openChatWithUser(@PathVariable Long partnerId,
             HttpSession session,
@@ -60,7 +61,7 @@ public class ChatController {
         return "Message/chat";
     }
 
-    // ======================= Gá»¬I TIN NHáº®N =======================
+    // ======================= Gửi tin nhắn =======================
     @PostMapping("/send")
     public String sendMessage(@RequestParam Long conversationId,
             @RequestParam Long receiverId,
@@ -82,7 +83,7 @@ public class ChatController {
         return "redirect:/messages/user/" + receiverId;
     }
 
-    // ======================= Láº¤Y DANH SÃCH CHAT =======================
+    // ======================= LẤY DANH SÁCH CHAT =======================
     @GetMapping("/list")
     @ResponseBody
     public Object getConversations(HttpSession session) {
@@ -95,9 +96,16 @@ public class ChatController {
 
         return conversationService.getUserConversations(userId)
                 .stream()
+
+                // 🚀 Sắp xếp để cuộc trò chuyện mới nhất nằm trên cùng
+                .sorted((a, b) -> b.getUpdatedAt().compareTo(a.getUpdatedAt()))
+
                 .map(conv -> {
 
-                    // ---- Láº¥y partner ----
+                    Message lastMsg = conv.getMessages().isEmpty()
+                            ? null
+                            : conv.getMessages().get(conv.getMessages().size() - 1);
+
                     ConversationMember partnerMember = conv.getMembers()
                             .stream()
                             .filter(m -> !m.getUser().getId().equals(userId))
@@ -106,22 +114,35 @@ public class ChatController {
 
                     User partner = partnerMember != null ? partnerMember.getUser() : null;
 
-                    // ---- Láº¥y tin nháº¯n cuá»‘i ----
-                    Message lastMsg = conv.getMessages().isEmpty()
-                            ? null
-                            : conv.getMessages().get(conv.getMessages().size() - 1);
+                    long unread = conv.getMessages()
+                            .stream()
+                            .filter(m -> !m.isRead() && !m.getSender().getId().equals(userId))
+                            .count();
 
-                    return Map.of(
-                            "conversationId", conv.getId(),
-                            "partnerId", partner != null ? partner.getId() : null,
-                            "partnerName", partner != null ? partner.getFullName() : "Unknown",
-                            "partnerAvatar", partner != null ? partner.getAvatarUrl() : null,
-                            "lastMessage", lastMsg != null ? lastMsg.getContent() : "",
-                            "unread", messageRepository.countByConversation_IdAndIsReadFalseAndSender_IdNot(conv.getId(), userId),
-                            "updatedAt", conv.getUpdatedAt().toString());
+                    String avatar = null;
+                    if (partner != null) {
+                        String raw = partner.getAvatarUrl();
+                        if (raw != null && !raw.isBlank()) {
+                            avatar = raw.startsWith("http")
+                                    ? raw
+                                    : (raw.contains("/uploads_avatar/")
+                                            ? raw
+                                            : "/uploads_avatar/" + raw);
+                        }
+                    }
+
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("conversationId", conv.getId());
+                    data.put("partnerId", partner != null ? partner.getId() : null);
+                    data.put("partnerName", partner != null ? partner.getFullName() : "Unknown");
+                    data.put("partnerAvatar", avatar);
+                    data.put("lastMessage", lastMsg != null ? lastMsg.getContent() : "");
+                    data.put("unread", unread);
+                    data.put("updatedAt", conv.getUpdatedAt().toString());
+
+                    return data;
                 })
                 .toList();
     }
 
 }
-
